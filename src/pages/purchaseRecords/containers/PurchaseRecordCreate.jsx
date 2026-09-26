@@ -107,15 +107,27 @@ function PurchaseRecordCreate() {
         };
 
         try {
-            await createPurchaseRecord(data);
+            const response = await createPurchaseRecord(data);
+
+            // Безопасно извлекаем ID независимо от структуры ответа Axios
+            const createdRecordId = response?.id || response?.data?.id;
 
             navigate(
-                `${pageURLs.purchaseRecords}${location.state?.listSearch || ''}`
+                `${pageURLs.purchaseRecords}/${createdRecordId}`,
+                {
+                    state: {
+                        listSearch: location.state?.listSearch || '',
+                        successMessage: 'Запис успішно створено.',
+                    },
+                }
             );
         } catch (error) {
             console.log('CATCH ERROR:', error);
 
-            if (error?.status === 409) {
+            // Корректно проверяем статус ответа для Axios
+            const status = error?.response?.status || error?.status;
+
+            if (status === 409) {
                 setRequestError(
                     'Даний матеріал вже входить до даної закупівлі.'
                 );

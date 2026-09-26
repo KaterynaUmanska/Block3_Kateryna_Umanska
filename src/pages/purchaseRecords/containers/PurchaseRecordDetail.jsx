@@ -79,6 +79,19 @@ function PurchaseRecordDetail() {
         loadData();
     }, [id]);
 
+    useEffect(() => {
+        if (location.state?.successMessage) {
+            setSuccessMessage(location.state.successMessage);
+
+            navigate(location.pathname, {
+                replace: true,
+                state: {
+                    listSearch: location.state?.listSearch || '',
+                },
+            });
+        }
+    }, [location, navigate]);
+
     const handleChange = (field) => (event) => {
         setForm((currentForm) => ({
             ...currentForm,

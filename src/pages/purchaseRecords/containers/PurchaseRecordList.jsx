@@ -343,7 +343,7 @@ function PurchaseRecordList() {
                     }}
                 >
                     <TextField
-                        label="Order ID"
+                        label="ID замовлення"
                         value={filterForm.orderId}
                         onChange={(event) =>
                             setFilterForm({
@@ -437,6 +437,9 @@ function PurchaseRecordList() {
                                     hover
                                     sx={{
                                         cursor: 'pointer',
+                                        '&:hover .delete-button': {
+                                            opacity: 1,
+                                        },
                                     }}
                                     onClick={() =>
                                         handleOpenRecord(
@@ -465,8 +468,12 @@ function PurchaseRecordList() {
                                         onClick={(event) =>
                                             event.stopPropagation()
                                         }
+                                        sx={{
+                                            width: 56,
+                                        }}
                                     >
                                         <IconButton
+                                            className="delete-button"
                                             aria-label="Видалити"
                                             onClick={() =>
                                                 setDeleteDialog({
@@ -476,6 +483,10 @@ function PurchaseRecordList() {
                                                     isLoading: false,
                                                 })
                                             }
+                                            sx={{
+                                                opacity: 0,
+                                                transition: 'opacity 0.2s ease',
+                                            }}
                                         >
                                             <DeleteOutlineIcon />
                                         </IconButton>

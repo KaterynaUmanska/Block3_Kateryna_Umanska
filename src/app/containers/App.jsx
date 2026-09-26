@@ -26,6 +26,10 @@ import IntlProvider from '../components/IntlProvider';
 import MissedPage from '../components/MissedPage';
 import SearchParamsConfigurator from '../components/SearchParamsConfigurator';
 
+import PurchaseRecordList from 'pages/purchaseRecords/containers/PurchaseRecordList';
+import PurchaseRecordDetail from 'pages/purchaseRecords/containers/PurchaseRecordDetail';
+import PurchaseRecordCreate from 'pages/purchaseRecords/containers/PurchaseRecordCreate';
+
 function App() {
   const dispatch = useDispatch();
   const [state, setState] = useState({
@@ -121,6 +125,19 @@ function App() {
                       )}
                       path="*"
                     />
+                    <Route
+                        element={<PurchaseRecordList />}
+                        path={pageURLs[pages.purchaseRecords]}
+                    />
+                    <Route
+                        path={`${pageURLs.purchaseRecords}/new`}
+                        element={<PurchaseRecordCreate />}
+                    />
+                    <Route
+                        path={`${pageURLs.purchaseRecords}/:id`}
+                        element={<PurchaseRecordDetail />}
+                    />
+
                   </Routes>
                 )}
               </IntlProvider>

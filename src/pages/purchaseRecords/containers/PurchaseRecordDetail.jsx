@@ -229,11 +229,32 @@ function PurchaseRecordDetail() {
 
     return (
         <Box sx={{ maxWidth: 700 }}>
-            <Box sx={{ marginBottom: 3 }}>
+            {/* Заголовок по центру */}
+            <Box sx={{ marginBottom: 2, textAlign: 'center' }}>
                 <Typography variant="h5">
                     Детальна інформація про запис
                 </Typography>
             </Box>
+
+            {/* Иконка редактирования (карандаш) справа под заголовком */}
+            {mode === 'view' && (
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        marginBottom: 2,
+                    }}
+                >
+                    <Tooltip title="Редагувати">
+                        <IconButton
+                            onClick={handleEdit}
+                            aria-label="Редагувати"
+                        >
+                            <EditIcon />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            )}
 
             {requestError && (
                 <Alert
@@ -245,7 +266,7 @@ function PurchaseRecordDetail() {
             )}
 
             {mode === 'view' && (
-                <>
+                <Box sx={{ pl: 4 }}>
                     <Typography sx={{ marginBottom: 2 }}>
                         <strong>ID:</strong> {record.id}
                     </Typography>
@@ -277,7 +298,7 @@ function PurchaseRecordDetail() {
                     <Box
                         sx={{
                             display: 'flex',
-                            justifyContent: 'space-between',
+                            justifyContent: 'flex-start',
                             alignItems: 'center',
                             marginTop: 3,
                         }}
@@ -285,17 +306,8 @@ function PurchaseRecordDetail() {
                         <Button onClick={handleBack}>
                             Назад
                         </Button>
-
-                        <Tooltip title="Редагувати">
-                            <IconButton
-                                onClick={handleEdit}
-                                aria-label="Редагувати"
-                            >
-                                <EditIcon />
-                            </IconButton>
-                        </Tooltip>
                     </Box>
-                </>
+                </Box>
             )}
 
             {mode === 'edit' && (

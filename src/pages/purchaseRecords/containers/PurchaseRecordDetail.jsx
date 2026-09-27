@@ -77,7 +77,7 @@ function PurchaseRecordDetail() {
                 }
 
                 if (!id) {
-                    setRequestError('Purchase record ID is missing');
+                    setRequestError('Запис не знайдено');
                     return;
                 }
 

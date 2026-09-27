@@ -229,14 +229,12 @@ function PurchaseRecordDetail() {
 
     return (
         <Box sx={{ maxWidth: 700 }}>
-            {/* Заголовок по центру */}
             <Box sx={{ marginBottom: 2, textAlign: 'center' }}>
                 <Typography variant="h5">
                     Детальна інформація про запис
                 </Typography>
             </Box>
 
-            {/* Иконка редактирования (карандаш) справа под заголовком */}
             {mode === 'view' && (
                 <Box
                     sx={{

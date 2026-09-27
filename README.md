@@ -106,7 +106,7 @@ Frontend використовує REST API Backend-сервісу з Блоку 
 `npm start`
 
 Після запуску застосунок доступний за адресою:
-http://localhost:3050
+[http://localhost:3050/purchase-records](http://localhost:3050/purchase-records)
 
 
 ## Структура основних сторінок

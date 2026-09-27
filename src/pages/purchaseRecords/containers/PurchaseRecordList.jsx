@@ -244,7 +244,11 @@ function PurchaseRecordList() {
                 isLoading: false,
             });
 
-            await loadRecords();
+            if (records.length === 1 && page > 1) {
+                setPage(page - 1);
+            } else {
+                await loadRecords();
+            }
 
             setNotification({
                 open: true,
@@ -309,7 +313,7 @@ function PurchaseRecordList() {
                     marginBottom: 3,
                 }}
             >
-                <TypographyMui variant="h5">
+                <TypographyMui variant="h5" sx={{ textAlign: 'center', flexGrow: 1 }} >
                     Записи про закупівлі
                 </TypographyMui>
 

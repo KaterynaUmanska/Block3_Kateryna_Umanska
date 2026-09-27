@@ -73,18 +73,28 @@ function PurchaseRecordCreate() {
 
         if (!form.orderId) {
             validationErrors.orderId = 'Order ID є обов’язковим.';
-        } else if (Number(form.orderId) <= 0) {
-            validationErrors.orderId = 'Order ID має бути більше 0.';
+        } else if (
+            !/^\d+$/.test(form.orderId) ||
+            Number(form.orderId) <= 0
+        ) {
+            validationErrors.orderId =
+                'Order ID має містити лише цифри та бути більше 0.';
         }
 
         if (!form.materialId) {
-            validationErrors.materialId = 'Матеріал є обов’язковим.';
+            validationErrors.materialId =
+                'Матеріал є обов’язковим.';
         }
 
         if (!form.quantity) {
-            validationErrors.quantity = 'Кількість є обов’язковою.';
-        } else if (Number(form.quantity) <= 0) {
-            validationErrors.quantity = 'Кількість має бути більше 0.';
+            validationErrors.quantity =
+                'Кількість є обов’язковою.';
+        } else if (
+            !/^\d+([.,]\d+)?$/.test(form.quantity) ||
+            Number(form.quantity.replace(',', '.')) <= 0
+        ) {
+            validationErrors.quantity =
+                'Кількість має бути числом більше 0.';
         }
 
         setErrors(validationErrors);

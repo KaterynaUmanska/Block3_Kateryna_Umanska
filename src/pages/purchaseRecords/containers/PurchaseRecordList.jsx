@@ -245,7 +245,25 @@ function PurchaseRecordList() {
             });
 
             if (records.length === 1 && page > 1) {
-                setPage(page - 1);
+                const newPage = page - 1;
+
+                setPage(newPage);
+
+                const currentParams = new URLSearchParams(window.location.search);
+                currentParams.set('page', String(newPage));
+
+                window.history.replaceState(
+                    null,
+                    '',
+                    `${window.location.pathname}?${currentParams.toString()}`
+                );
+
+                sessionStorage.setItem(
+                    'purchaseRecordsListSearch',
+                    currentParams.toString()
+                );
+
+                await loadRecords();
             } else {
                 await loadRecords();
             }

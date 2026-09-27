@@ -230,75 +230,78 @@ function PurchaseRecordDetail() {
                         listSearch: location.state?.listSearch || '', successMessage: 'Запис успішно створено.',},
                 });
 
-} catch (error) {
-    console.error('CREATE ERROR:', error);
+        }catch (error) {
+            console.error('CREATE ERROR:', error);
 
-    if (error?.status === 409) {
-        setRequestError(
-            'Даний матеріал вже входить до даної закупівлі.'
-        );
-    } else {
-        setRequestError(
-            'Не вдалося створити запис. Перевірте введені дані.'
-        );
+            if (error?.status === 409) {
+                setRequestError(
+                    'Даний матеріал вже входить до даної закупівлі.'
+                );
+                return;
+            }
+
+            setRequestError(
+                'Не вдалося створити запис. Перевірте введені дані.'
+            );
+        } finally {
+            setIsSaving(false);
     }
-} finally {
-    setIsSaving(false);
-}
 };
+
 
 const handleSave = async () => {
-    if (!validate()) {
-        return;
-    }
-
-    setIsSaving(true);
-    setRequestError('');
-
-    const data = {
-        orderId: Number(form.orderId),
-        materialId: Number(form.materialId),
-        quantity: Number(
-            String(form.quantity).replace(',', '.')
-        ),
-    };
-
-    try {
-        await updatePurchaseRecord(id, data);
-
-        const updatedRecord =
-            await getPurchaseRecord(id);
-
-        setRecord(updatedRecord);
-
-        setForm({
-            orderId: updatedRecord.orderId,
-            materialId:
-                updatedRecord.material?.id || '',
-            quantity: updatedRecord.quantity,
-        });
-
-        setMode('view');
-
-        setSuccessMessage(
-            'Запис успішно відредаговано.'
-        );
-    } catch (error) {
-        console.error('UPDATE ERROR:', error);
-
-        if (error?.status === 409) {
-            setRequestError(
-                'Даний матеріал вже входить до даної закупівлі.'
-            );
-        } else {
-            setRequestError(
-                'Не вдалося зберегти зміни. Перевірте введені дані.'
-            );
+        if (!validate()) {
+            return;
         }
-    } finally {
-        setIsSaving(false);
-    }
-};
+
+        setIsSaving(true);
+        setRequestError('');
+
+        const data = {
+            orderId: Number(form.orderId),
+            materialId: Number(form.materialId),
+            quantity: Number(
+                String(form.quantity).replace(',', '.')
+            ),
+        };
+
+        try {
+            await updatePurchaseRecord(id, data);
+
+            const updatedRecord =
+                await getPurchaseRecord(id);
+
+            setRecord(updatedRecord);
+
+            setForm({
+                orderId: updatedRecord.orderId,
+                materialId:
+                    updatedRecord.material?.id || '',
+                quantity: updatedRecord.quantity,
+            });
+
+            setMode('view');
+
+            setSuccessMessage(
+                'Запис успішно відредаговано.'
+            );
+        } catch (error) {
+            console.error('CREATE ERROR:', error);
+
+            if (error?.status === 409) {
+                setRequestError(
+                    'Даний матеріал вже входить до даної закупівлі.'
+                );
+                return;
+            }
+
+            setRequestError(
+                'Не вдалося створити запис. Перевірте введені дані.'
+            );
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
 const handleBack = () => {
     navigate(

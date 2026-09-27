@@ -259,7 +259,7 @@ function PurchaseRecordList() {
                 );
 
                 sessionStorage.setItem(
-                    'purchaseRecordsListSearch',
+                    LIST_STATE_KEY,
                     currentParams.toString()
                 );
 

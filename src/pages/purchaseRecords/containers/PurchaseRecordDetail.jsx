@@ -223,18 +223,13 @@ function PurchaseRecordDetail() {
             const createdRecord =
                 await createPurchaseRecord(data);
 
-            navigate(
-                `${pageURLs.purchaseRecords}/${createdRecord.id}`,
-{
-    replace: true,
-        state: {
-    listSearch:
-        location.state?.listSearch || '',
-            successMessage:
-    'Запис успішно створено.',
-},
-}
-);
+            navigate(`${pageURLs.purchaseRecords}/${createdRecord.id}`,
+                {
+                    replace: true,
+                    state: {
+                        listSearch: location.state?.listSearch || '', successMessage: 'Запис успішно створено.',},
+                });
+
 } catch (error) {
     console.error('CREATE ERROR:', error);
 

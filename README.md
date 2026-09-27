@@ -102,6 +102,7 @@ Frontend використовує REST API Backend-сервісу з Блоку 
 
 Встановлення залежностей
 `npm install`
+
 Запуск 
 `npm start`
 

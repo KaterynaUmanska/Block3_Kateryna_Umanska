@@ -116,7 +116,7 @@ Frontend використовує REST API Backend-сервісу з Блоку 
 
 `/purchase-records/new` - cтворення PurchaseRecord
 
-`/purchase-records/:id` - детальна інформація / редагування PurchaseRecord
+`/purchase-records/id` - детальна інформація / редагування PurchaseRecord
 
 ## Git workflow
 

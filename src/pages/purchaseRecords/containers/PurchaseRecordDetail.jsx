@@ -135,12 +135,12 @@ function PurchaseRecordDetail() {
         const validationErrors = {};
 
         if (!form.orderId) {
-            validationErrors.orderId = 'Order ID є обов’язковим.';
+            validationErrors.orderId = 'ID Заявки є обов’язковим.';
         } else if (
             !/^\d+$/.test(String(form.orderId)) ||
             Number(form.orderId) <= 0
         ) {
-            validationErrors.orderId = 'Order ID має містити лише цифри та бути більше 0.';
+            validationErrors.orderId = 'ID Заявки має містити лише цифри та бути більше 0.';
         }
 
         if (!form.materialId) {
@@ -304,7 +304,7 @@ function PurchaseRecordDetail() {
                         <strong>ID:</strong> {record.id}
                     </Typography>
                     <Typography sx={{ marginBottom: 2 }}>
-                        <strong>Order ID:</strong> {record.orderId}
+                        <strong>ID Заявки:</strong> {record.orderId}
                     </Typography>
                     <Typography sx={{ marginBottom: 2 }}>
                         <strong>Матеріал:</strong> {record.material?.name}
@@ -329,7 +329,7 @@ function PurchaseRecordDetail() {
                 <>
                     <TextField
                         fullWidth
-                        label="Order ID"
+                        label="ID Заявки"
                         margin="normal"
                         value={form.orderId}
                         error={Boolean(errors.orderId)}

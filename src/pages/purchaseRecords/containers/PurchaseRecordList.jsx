@@ -429,7 +429,7 @@ function PurchaseRecordList() {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>
-                                Order ID
+                                ID Заявки
                             </TableCell>
                             <TableCell>
                                 Матеріал

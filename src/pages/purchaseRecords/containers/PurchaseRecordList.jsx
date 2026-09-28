@@ -355,7 +355,7 @@ function PurchaseRecordList() {
                     }}
                 >
                     <TextField
-                        label="ID замовлення"
+                        label="ID Заявки"
                         value={filterForm.orderId}
                         onChange={(event) =>
                             setFilterForm({

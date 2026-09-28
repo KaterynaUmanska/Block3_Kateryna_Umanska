@@ -90,10 +90,6 @@ function PurchaseRecordList() {
     const [filters, setFilters] = useState(() => getFiltersFromParams(initialParams));
     const [filterForm, setFilterForm] = useState(() => getFiltersFromParams(initialParams));
 
-    /*
-     * Restore URL from sessionStorage if we returned to the list
-     * without query parameters.
-     */
     useEffect(() => {
         const currentSavedSearch = sessionStorage.getItem(LIST_STATE_KEY) || '';
         setSavedSearch(currentSavedSearch);
@@ -106,9 +102,6 @@ function PurchaseRecordList() {
         }
     }, [location.search, navigate]);
 
-    /*
-     * Synchronize React state with URL whenever location.search changes.
-     */
     useEffect(() => {
         const currentSearch = location.search || sessionStorage.getItem(LIST_STATE_KEY) || '';
 
@@ -174,9 +167,6 @@ function PurchaseRecordList() {
         loadRecords();
     }, [loadRecords]);
 
-    /*
-     * Updates URL and saves the current list state.
-     */
     const updateUrl = (
         nextFilters,
         nextPage = 1,

@@ -28,6 +28,8 @@ import {
     deletePurchaseRecord,
 } from 'misc/requests/purchaseRecords';
 
+import { useIntl } from 'react-intl';
+
 const DEFAULT_PAGE = 1;
 const DEFAULT_SIZE = 10;
 
@@ -41,6 +43,8 @@ const EMPTY_FILTERS = {
 };
 
 function PurchaseRecordList() {
+    const { formatMessage } = useIntl();
+
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -76,6 +80,7 @@ function PurchaseRecordList() {
     const [page, setPage] = useState(
         Number(initialParams.get('page')) || DEFAULT_PAGE
     );
+
     const [size, setSize] = useState(
         Number(initialParams.get('size')) || DEFAULT_SIZE
     );
@@ -87,11 +92,18 @@ function PurchaseRecordList() {
         quantityTo: params.get('quantityTo') || '',
     });
 
-    const [filters, setFilters] = useState(() => getFiltersFromParams(initialParams));
-    const [filterForm, setFilterForm] = useState(() => getFiltersFromParams(initialParams));
+    const [filters, setFilters] = useState(
+        () => getFiltersFromParams(initialParams)
+    );
+
+    const [filterForm, setFilterForm] = useState(
+        () => getFiltersFromParams(initialParams)
+    );
 
     useEffect(() => {
-        const currentSavedSearch = sessionStorage.getItem(LIST_STATE_KEY) || '';
+        const currentSavedSearch =
+            sessionStorage.getItem(LIST_STATE_KEY) || '';
+
         setSavedSearch(currentSavedSearch);
 
         if (!location.search && currentSavedSearch) {
@@ -103,18 +115,34 @@ function PurchaseRecordList() {
     }, [location.search, navigate]);
 
     useEffect(() => {
-        const currentSearch = location.search || sessionStorage.getItem(LIST_STATE_KEY) || '';
+        const currentSearch =
+            location.search ||
+            sessionStorage.getItem(LIST_STATE_KEY) ||
+            '';
 
         if (currentSearch) {
-            sessionStorage.setItem(LIST_STATE_KEY, currentSearch);
+            sessionStorage.setItem(
+                LIST_STATE_KEY,
+                currentSearch
+            );
+
             setSavedSearch(currentSearch);
 
-            const params = new URLSearchParams(currentSearch);
+            const params = new URLSearchParams(
+                currentSearch
+            );
 
-            setPage(Number(params.get('page')) || DEFAULT_PAGE);
-            setSize(Number(params.get('size')) || DEFAULT_SIZE);
+            setPage(
+                Number(params.get('page')) || DEFAULT_PAGE
+            );
 
-            const nextFilters = getFiltersFromParams(params);
+            setSize(
+                Number(params.get('size')) || DEFAULT_SIZE
+            );
+
+            const nextFilters =
+                getFiltersFromParams(params);
+
             setFilters(nextFilters);
             setFilterForm(nextFilters);
         }
@@ -124,34 +152,41 @@ function PurchaseRecordList() {
         setIsLoading(true);
 
         try {
-            const response = await getPurchaseRecords({
-                orderId: filters.orderId
-                    ? Number(filters.orderId)
-                    : null,
+            const response =
+                await getPurchaseRecords({
+                    orderId: filters.orderId
+                        ? Number(filters.orderId)
+                        : null,
 
-                materialName: filters.materialName
-                    ? filters.materialName
-                    : null,
+                    materialName:
+                        filters.materialName
+                            ? filters.materialName
+                            : null,
 
-                quantityFrom: filters.quantityFrom
-                    ? Number(filters.quantityFrom)
-                    : null,
+                    quantityFrom:
+                        filters.quantityFrom
+                            ? Number(filters.quantityFrom)
+                            : null,
 
-                quantityTo: filters.quantityTo
-                    ? Number(filters.quantityTo)
-                    : null,
+                    quantityTo:
+                        filters.quantityTo
+                            ? Number(filters.quantityTo)
+                            : null,
 
-                page,
-                size,
-            });
+                    page,
+                    size,
+                });
 
             setRecords(response.list || []);
-            setTotalPages(response.totalPages || 1);
+            setTotalPages(
+                response.totalPages || 1
+            );
         } catch (error) {
             setNotification({
                 open: true,
-                message:
-                    'Не вдалося завантажити записи про закупівлі.',
+                message: formatMessage({
+                    id: 'purchaseRecords.error.loadList',
+                }),
                 severity: 'error',
             });
         } finally {
@@ -161,6 +196,7 @@ function PurchaseRecordList() {
         filters,
         page,
         size,
+        formatMessage,
     ]);
 
     useEffect(() => {
@@ -174,21 +210,32 @@ function PurchaseRecordList() {
     ) => {
         const params = new URLSearchParams();
 
-        params.set('page', String(nextPage));
-        params.set('size', String(nextSize));
+        params.set(
+            'page',
+            String(nextPage)
+        );
 
-        Object.entries(nextFilters).forEach(([key, value]) => {
-            if (value !== '') {
-                params.set(key, value);
+        params.set(
+            'size',
+            String(nextSize)
+        );
+
+        Object.entries(nextFilters).forEach(
+            ([key, value]) => {
+                if (value !== '') {
+                    params.set(key, value);
+                }
             }
-        });
+        );
 
-        const search = `?${params.toString()}`;
+        const search =
+            `?${params.toString()}`;
 
         sessionStorage.setItem(
             LIST_STATE_KEY,
             search
         );
+
         setSavedSearch(search);
 
         navigate(
@@ -197,18 +244,30 @@ function PurchaseRecordList() {
     };
 
     const handleFilterSubmit = () => {
-        updateUrl(filterForm, 1);
+        updateUrl(
+            filterForm,
+            1
+        );
+
         setShowFilters(false);
     };
 
     const handleClearFilters = () => {
         setFilterForm(EMPTY_FILTERS);
-        updateUrl(EMPTY_FILTERS, 1);
+
+        updateUrl(
+            EMPTY_FILTERS,
+            1
+        );
+
         setShowFilters(false);
     };
 
     const handlePageChange = (nextPage) => {
-        updateUrl(filters, nextPage);
+        updateUrl(
+            filters,
+            nextPage
+        );
     };
 
     const handleDelete = async () => {
@@ -234,13 +293,23 @@ function PurchaseRecordList() {
                 isLoading: false,
             });
 
-            if (records.length === 1 && page > 1) {
+            if (
+                records.length === 1 &&
+                page > 1
+            ) {
                 const newPage = page - 1;
 
                 setPage(newPage);
 
-                const currentParams = new URLSearchParams(window.location.search);
-                currentParams.set('page', String(newPage));
+                const currentParams =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+                currentParams.set(
+                    'page',
+                    String(newPage)
+                );
 
                 window.history.replaceState(
                     null,
@@ -260,14 +329,17 @@ function PurchaseRecordList() {
 
             setNotification({
                 open: true,
-                message: 'Запис успішно видалено.',
+                message: formatMessage({
+                    id: 'purchaseRecords.success.deleted',
+                }),
                 severity: 'success',
             });
         } catch (error) {
             setDeleteDialog((state) => ({
                 ...state,
-                error:
-                    'Не вдалося видалити запис. Спробуйте ще раз.',
+                error: formatMessage({
+                    id: 'purchaseRecords.error.delete',
+                }),
                 isLoading: false,
             }));
         }
@@ -321,25 +393,46 @@ function PurchaseRecordList() {
                     marginBottom: 3,
                 }}
             >
-                <TypographyMui variant="h5" sx={{ textAlign: 'center', flexGrow: 1 }} >
-                    Записи про закупівлі
+                <TypographyMui
+                    variant="h5"
+                    sx={{
+                        textAlign: 'center',
+                        flexGrow: 1,
+                    }}
+                >
+                    {formatMessage({
+                        id: 'purchaseRecords.title',
+                    })}
                 </TypographyMui>
 
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 1,
+                    }}
+                >
                     <Button
-                        startIcon={<FilterAltIcon />}
+                        startIcon={
+                            <FilterAltIcon />
+                        }
                         onClick={() =>
-                            setShowFilters((value) => !value)
+                            setShowFilters(
+                                (value) => !value
+                            )
                         }
                     >
-                        Фільтр
+                        {formatMessage({
+                            id: 'purchaseRecords.filter',
+                        })}
                     </Button>
 
                     <Button
                         startIcon={<AddIcon />}
                         onClick={handleCreate}
                     >
-                        Додати сутність
+                        {formatMessage({
+                            id: 'purchaseRecords.add',
+                        })}
                     </Button>
                 </Box>
             </Box>
@@ -355,19 +448,28 @@ function PurchaseRecordList() {
                     }}
                 >
                     <TextField
-                        label="ID Заявки"
-                        value={filterForm.orderId}
+                        label={formatMessage({
+                            id: 'purchaseRecords.orderId',
+                        })}
+                        value={
+                            filterForm.orderId
+                        }
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
-                                orderId: event.target.value,
+                                orderId:
+                                event.target.value,
                             })
                         }
                     />
 
                     <TextField
-                        label="Матеріал"
-                        value={filterForm.materialName}
+                        label={formatMessage({
+                            id: 'purchaseRecords.material',
+                        })}
+                        value={
+                            filterForm.materialName
+                        }
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
@@ -378,8 +480,12 @@ function PurchaseRecordList() {
                     />
 
                     <TextField
-                        label="Кількість від"
-                        value={filterForm.quantityFrom}
+                        label={formatMessage({
+                            id: 'purchaseRecords.quantityFrom',
+                        })}
+                        value={
+                            filterForm.quantityFrom
+                        }
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
@@ -390,8 +496,12 @@ function PurchaseRecordList() {
                     />
 
                     <TextField
-                        label="Кількість до"
-                        value={filterForm.quantityTo}
+                        label={formatMessage({
+                            id: 'purchaseRecords.quantityTo',
+                        })}
+                        value={
+                            filterForm.quantityTo
+                        }
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
@@ -408,103 +518,151 @@ function PurchaseRecordList() {
                         }}
                     >
                         <Button
-                            onClick={handleFilterSubmit}
+                            onClick={
+                                handleFilterSubmit
+                            }
                         >
-                            Застосувати
+                            {formatMessage({
+                                id: 'purchaseRecords.apply',
+                            })}
                         </Button>
 
                         <Button
                             variant="text"
-                            onClick={handleClearFilters}
+                            onClick={
+                                handleClearFilters
+                            }
                         >
-                            Очистити
+                            {formatMessage({
+                                id: 'purchaseRecords.clear',
+                            })}
                         </Button>
                     </Box>
                 </Box>
             )}
 
-            <Box sx={{ overflowX: 'auto' }}>
+            <Box
+                sx={{
+                    overflowX: 'auto',
+                }}
+            >
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
                             <TableCell>
-                                ID Заявки
+                                {formatMessage({
+                                    id: 'purchaseRecords.id',
+                                })}
                             </TableCell>
+
                             <TableCell>
-                                Матеріал
+                                {formatMessage({
+                                    id: 'purchaseRecords.orderId',
+                                })}
                             </TableCell>
+
                             <TableCell>
-                                Кількість
+                                {formatMessage({
+                                    id: 'purchaseRecords.material',
+                                })}
                             </TableCell>
+
+                            <TableCell>
+                                {formatMessage({
+                                    id: 'purchaseRecords.quantity',
+                                })}
+                            </TableCell>
+
                             <TableCell align="right" />
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
                         {!isLoading &&
-                            records.map((record) => (
-                                <TableRow
-                                    key={record.id}
-                                    hover
-                                    sx={{
-                                        cursor: 'pointer',
-                                        '&:hover .delete-button': {
-                                            opacity: 1,
-                                        },
-                                    }}
-                                    onClick={() =>
-                                        handleOpenRecord(
+                            records.map(
+                                (record) => (
+                                    <TableRow
+                                        key={
                                             record.id
-                                        )
-                                    }
-                                >
-                                    <TableCell>
-                                        {record.id}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {record.orderId}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {record.materialName}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {record.quantity}
-                                    </TableCell>
-
-                                    <TableCell
-                                        align="right"
-                                        onClick={(event) =>
-                                            event.stopPropagation()
                                         }
+                                        hover
                                         sx={{
-                                            width: 56,
+                                            cursor:
+                                                'pointer',
+
+                                            '&:hover .delete-button':
+                                                {
+                                                    opacity: 1,
+                                                },
                                         }}
+                                        onClick={() =>
+                                            handleOpenRecord(
+                                                record.id
+                                            )
+                                        }
                                     >
-                                        <IconButton
-                                            className="delete-button"
-                                            aria-label="Видалити"
-                                            onClick={() =>
-                                                setDeleteDialog({
-                                                    open: true,
-                                                    record,
-                                                    error: '',
-                                                    isLoading: false,
-                                                })
+                                        <TableCell>
+                                            {
+                                                record.id
+                                            }
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {
+                                                record.orderId
+                                            }
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {
+                                                record.materialName
+                                            }
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {
+                                                record.quantity
+                                            }
+                                        </TableCell>
+
+                                        <TableCell
+                                            align="right"
+                                            onClick={(
+                                                event
+                                            ) =>
+                                                event.stopPropagation()
                                             }
                                             sx={{
-                                                opacity: 0,
-                                                transition: 'opacity 0.2s ease',
+                                                width: 56,
                                             }}
                                         >
-                                            <DeleteOutlineIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                            <IconButton
+                                                className="delete-button"
+                                                aria-label={formatMessage({
+                                                    id: 'purchaseRecords.delete.confirmButton',
+                                                })}
+                                                onClick={() =>
+                                                    setDeleteDialog(
+                                                        {
+                                                            open: true,
+                                                            record,
+                                                            error: '',
+                                                            isLoading: false,
+                                                        }
+                                                    )
+                                                }
+                                                sx={{
+                                                    opacity: 0,
+                                                    transition:
+                                                        'opacity 0.2s ease',
+                                                }}
+                                            >
+                                                <DeleteOutlineIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            )}
 
                         {!isLoading &&
                             records.length === 0 && (
@@ -513,7 +671,9 @@ function PurchaseRecordList() {
                                         colSpan={5}
                                         align="center"
                                     >
-                                        Записів не знайдено.
+                                        {formatMessage({
+                                            id: 'purchaseRecords.noRecords',
+                                        })}
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -524,7 +684,9 @@ function PurchaseRecordList() {
                                     colSpan={5}
                                     align="center"
                                 >
-                                    Завантаження...
+                                    {formatMessage({
+                                        id: 'purchaseRecords.loading',
+                                    })}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -543,13 +705,18 @@ function PurchaseRecordList() {
             >
                 <Button
                     disabled={
-                        page <= 1 || isLoading
+                        page <= 1 ||
+                        isLoading
                     }
                     onClick={() =>
-                        handlePageChange(page - 1)
+                        handlePageChange(
+                            page - 1
+                        )
                     }
                 >
-                    Попередня
+                    {formatMessage({
+                        id: 'purchaseRecords.previous',
+                    })}
                 </Button>
 
                 <TypographyMui>
@@ -558,20 +725,27 @@ function PurchaseRecordList() {
 
                 <Button
                     disabled={
-                        page >= totalPages || isLoading
+                        page >= totalPages ||
+                        isLoading
                     }
                     onClick={() =>
-                        handlePageChange(page + 1)
+                        handlePageChange(
+                            page + 1
+                        )
                     }
                 >
-                    Наступна
+                    {formatMessage({
+                        id: 'purchaseRecords.next',
+                    })}
                 </Button>
             </Box>
 
             <Dialog
                 open={deleteDialog.open}
                 onClose={() => {
-                    if (!deleteDialog.isLoading) {
+                    if (
+                        !deleteDialog.isLoading
+                    ) {
                         setDeleteDialog({
                             open: false,
                             record: null,
@@ -583,23 +757,37 @@ function PurchaseRecordList() {
             >
                 <Box sx={{ padding: 3 }}>
                     <TypographyMui variant="h6">
-                        Видалення запису
+                        {formatMessage({
+                            id: 'purchaseRecords.delete.title',
+                        })}
                     </TypographyMui>
 
                     <TypographyMui
-                        sx={{ marginTop: 2 }}
+                        sx={{
+                            marginTop: 2,
+                        }}
                     >
-                        Ви впевнені, що хочете видалити
-                        запис №{' '}
-                        {deleteDialog.record?.id}?
+                        {formatMessage(
+                            {
+                                id: 'purchaseRecords.delete.confirm',
+                            },
+                            {
+                                id: deleteDialog
+                                    .record?.id,
+                            }
+                        )}
                     </TypographyMui>
 
                     {deleteDialog.error && (
                         <Alert
                             severity="error"
-                            sx={{ marginTop: 2 }}
+                            sx={{
+                                marginTop: 2,
+                            }}
                         >
-                            {deleteDialog.error}
+                            {
+                                deleteDialog.error
+                            }
                         </Alert>
                     )}
 
@@ -607,7 +795,8 @@ function PurchaseRecordList() {
                         sx={{
                             display: 'flex',
                             gap: 1,
-                            justifyContent: 'flex-end',
+                            justifyContent:
+                                'flex-end',
                             marginTop: 3,
                         }}
                     >
@@ -624,7 +813,9 @@ function PurchaseRecordList() {
                                 })
                             }
                         >
-                            Скасувати
+                            {formatMessage({
+                                id: 'purchaseRecords.cancel',
+                            })}
                         </Button>
 
                         <Button
@@ -634,9 +825,13 @@ function PurchaseRecordList() {
                             isLoading={
                                 deleteDialog.isLoading
                             }
-                            onClick={handleDelete}
+                            onClick={
+                                handleDelete
+                            }
                         >
-                            Видалити
+                            {formatMessage({
+                                id: 'purchaseRecords.delete.confirmButton',
+                            })}
                         </Button>
                     </Box>
                 </Box>
@@ -644,7 +839,9 @@ function PurchaseRecordList() {
 
             <Snackbar
                 autoHideDuration={3000}
-                open={notification.open}
+                open={
+                    notification.open
+                }
                 onClose={() =>
                     setNotification({
                         ...notification,
@@ -653,7 +850,9 @@ function PurchaseRecordList() {
                 }
             >
                 <Alert
-                    severity={notification.severity}
+                    severity={
+                        notification.severity
+                    }
                     onClose={() =>
                         setNotification({
                             ...notification,
@@ -661,7 +860,9 @@ function PurchaseRecordList() {
                         })
                     }
                 >
-                    {notification.message}
+                    {
+                        notification.message
+                    }
                 </Alert>
             </Snackbar>
         </Box>

@@ -22,12 +22,16 @@ import {
     createPurchaseRecord,
 } from 'misc/requests/purchaseRecords';
 
+import { useIntl } from 'react-intl';
+
 const isConflictError = (error) => {
     const status = error?.status || error?.response?.status;
     return Number(status) === 409;
 };
 
 function PurchaseRecordDetail() {
+    const { formatMessage } = useIntl();
+
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
@@ -78,44 +82,69 @@ function PurchaseRecordDetail() {
                 }
 
                 if (!id) {
-                    setRequestError('Запис не знайдено');
+                    setRequestError(
+                        formatMessage({
+                            id: 'purchaseRecords.error.notFound',
+                        })
+                    );
                     return;
                 }
 
-                const recordResponse = await getPurchaseRecord(id);
+                const recordResponse =
+                    await getPurchaseRecord(id);
+
                 setRecord(recordResponse);
 
                 setForm({
                     orderId: recordResponse.orderId,
-                    materialId: recordResponse.material?.id || '',
+                    materialId:
+                        recordResponse.material?.id || '',
                     quantity: recordResponse.quantity,
                 });
 
                 setMode('view');
-
             } catch (error) {
-                console.error('LOAD DETAIL ERROR:', error);
-                setRequestError('Не вдалося завантажити запис про закупівлю.');
+                console.error(
+                    'LOAD DETAIL ERROR:',
+                    error
+                );
+
+                setRequestError(
+                    formatMessage({
+                        id: 'purchaseRecords.error.load',
+                    })
+                );
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadData();
-    }, [id, isCreateMode]);
+    }, [
+        id,
+        isCreateMode,
+        formatMessage,
+    ]);
 
     useEffect(() => {
         if (location.state?.successMessage) {
-            setSuccessMessage(location.state.successMessage);
+            setSuccessMessage(
+                location.state.successMessage
+            );
 
             navigate(location.pathname, {
                 replace: true,
                 state: {
-                    listSearch: location.state?.listSearch || '',
+                    listSearch:
+                        location.state?.listSearch ||
+                        '',
                 },
             });
         }
-    }, [location, navigate]);
+    }, [
+        location,
+        navigate,
+    ]);
 
     const handleChange = (field) => (event) => {
         setForm((currentForm) => ({
@@ -135,35 +164,67 @@ function PurchaseRecordDetail() {
         const validationErrors = {};
 
         if (!form.orderId) {
-            validationErrors.orderId = 'ID Заявки є обов’язковим.';
+            validationErrors.orderId =
+                formatMessage({
+                    id: 'purchaseRecords.validation.orderIdRequired',
+                });
         } else if (
-            !/^\d+$/.test(String(form.orderId)) ||
+            !/^\d+$/.test(
+                String(form.orderId)
+            ) ||
             Number(form.orderId) <= 0
         ) {
-            validationErrors.orderId = 'ID Заявки має містити лише цифри та бути більше 0.';
+            validationErrors.orderId =
+                formatMessage({
+                    id: 'purchaseRecords.validation.orderIdInvalid',
+                });
         }
 
         if (!form.materialId) {
-            validationErrors.materialId = 'Матеріал є обов’язковим.';
+            validationErrors.materialId =
+                formatMessage({
+                    id: 'purchaseRecords.validation.materialRequired',
+                });
         }
 
         if (!form.quantity) {
-            validationErrors.quantity = 'Кількість є обов’язковою.';
+            validationErrors.quantity =
+                formatMessage({
+                    id: 'purchaseRecords.validation.quantityRequired',
+                });
         } else if (
-            !/^\d+([.,]\d+)?$/.test(String(form.quantity)) ||
-            Number(String(form.quantity).replace(',', '.')) <= 0
+            !/^\d+([.,]\d+)?$/.test(
+                String(form.quantity)
+            ) ||
+            Number(
+                String(form.quantity).replace(
+                    ',',
+                    '.'
+                )
+            ) <= 0
         ) {
-            validationErrors.quantity = 'Кількість має бути числом більше 0.';
+            validationErrors.quantity =
+                formatMessage({
+                    id: 'purchaseRecords.validation.quantityInvalid',
+                });
         }
 
         setErrors(validationErrors);
-        return Object.keys(validationErrors).length === 0;
+
+        return (
+            Object.keys(validationErrors).length === 0
+        );
     };
 
     const getPreparedData = () => ({
         orderId: Number(form.orderId),
         materialId: Number(form.materialId),
-        quantity: Number(String(form.quantity).replace(',', '.')),
+        quantity: Number(
+            String(form.quantity).replace(
+                ',',
+                '.'
+            )
+        ),
     });
 
     const handleEdit = () => {
@@ -174,13 +235,18 @@ function PurchaseRecordDetail() {
 
     const handleCancel = () => {
         if (isCreateMode) {
-            navigate(`${pageURLs.purchaseRecords}${location.state?.listSearch || ''}`);
+            navigate(
+                `${pageURLs.purchaseRecords}${
+                    location.state?.listSearch || ''
+                }`
+            );
             return;
         }
 
         setForm({
             orderId: record.orderId,
-            materialId: record.material?.id || '',
+            materialId:
+                record.material?.id || '',
             quantity: record.quantity,
         });
 
@@ -190,28 +256,53 @@ function PurchaseRecordDetail() {
     };
 
     const handleCreate = async () => {
-        if (!validate()) return;
+        if (!validate()) {
+            return;
+        }
 
         setIsSaving(true);
         setRequestError('');
 
         try {
-            const createdRecord = await createPurchaseRecord(getPreparedData());
+            const createdRecord =
+                await createPurchaseRecord(
+                    getPreparedData()
+                );
 
-            navigate(`${pageURLs.purchaseRecords}/${createdRecord.id}`, {
-                replace: true,
-                state: {
-                    listSearch: location.state?.listSearch || '',
-                    successMessage: 'Запис успішно створено.',
-                },
-            });
+            navigate(
+                `${pageURLs.purchaseRecords}/${createdRecord.id}`,
+                {
+                    replace: true,
+                    state: {
+                        listSearch:
+                            location.state
+                                ?.listSearch ||
+                            '',
+                        successMessage:
+                            formatMessage({
+                                id: 'purchaseRecords.success.created',
+                            }),
+                    },
+                }
+            );
         } catch (error) {
-            console.error('CREATE ERROR:', error);
+            console.error(
+                'CREATE ERROR:',
+                error
+            );
 
             if (isConflictError(error)) {
-                setRequestError('Даний матеріал вже входить до даної закупівлі.');
+                setRequestError(
+                    formatMessage({
+                        id: 'purchaseRecords.error.conflict',
+                    })
+                );
             } else {
-                setRequestError('Не вдалося створити запис. Перевірте введені дані.');
+                setRequestError(
+                    formatMessage({
+                        id: 'purchaseRecords.error.create',
+                    })
+                );
             }
         } finally {
             setIsSaving(false);
@@ -219,32 +310,59 @@ function PurchaseRecordDetail() {
     };
 
     const handleSave = async () => {
-        if (!validate()) return;
+        if (!validate()) {
+            return;
+        }
 
         setIsSaving(true);
         setRequestError('');
 
         try {
-            await updatePurchaseRecord(id, getPreparedData());
+            await updatePurchaseRecord(
+                id,
+                getPreparedData()
+            );
 
-            const updatedRecord = await getPurchaseRecord(id);
+            const updatedRecord =
+                await getPurchaseRecord(id);
+
             setRecord(updatedRecord);
 
             setForm({
-                orderId: updatedRecord.orderId,
-                materialId: updatedRecord.material?.id || '',
-                quantity: updatedRecord.quantity,
+                orderId:
+                updatedRecord.orderId,
+                materialId:
+                    updatedRecord.material?.id ||
+                    '',
+                quantity:
+                updatedRecord.quantity,
             });
 
             setMode('view');
-            setSuccessMessage('Запис успішно відредаговано.');
+
+            setSuccessMessage(
+                formatMessage({
+                    id: 'purchaseRecords.success.updated',
+                })
+            );
         } catch (error) {
-            console.error('UPDATE ERROR:', error);
+            console.error(
+                'UPDATE ERROR:',
+                error
+            );
 
             if (isConflictError(error)) {
-                setRequestError('Даний матеріал вже входить до даної закупівлі.');
+                setRequestError(
+                    formatMessage({
+                        id: 'purchaseRecords.error.conflict',
+                    })
+                );
             } else {
-                setRequestError('Не вдалося зберегти зміни. Перевірте введені дані.');
+                setRequestError(
+                    formatMessage({
+                        id: 'purchaseRecords.error.update',
+                    })
+                );
             }
         } finally {
             setIsSaving(false);
@@ -252,7 +370,11 @@ function PurchaseRecordDetail() {
     };
 
     const handleBack = () => {
-        navigate(`${pageURLs.purchaseRecords}${location.state?.listSearch || ''}`);
+        navigate(
+            `${pageURLs.purchaseRecords}${
+                location.state?.listSearch || ''
+            }`
+        );
     };
 
     if (isLoading) {
@@ -262,9 +384,16 @@ function PurchaseRecordDetail() {
     if (!record && !isCreateMode) {
         return (
             <Box>
-                <Alert severity="error">{requestError}</Alert>
+                <Alert severity="error">
+                    {requestError}
+                </Alert>
+
                 <Box sx={{ marginTop: 2 }}>
-                    <Button onClick={handleBack}>Назад</Button>
+                    <Button onClick={handleBack}>
+                        {formatMessage({
+                            id: 'purchaseRecords.back',
+                        })}
+                    </Button>
                 </Box>
             </Box>
         );
@@ -272,20 +401,47 @@ function PurchaseRecordDetail() {
 
     return (
         <Box sx={{ maxWidth: 700 }}>
-            <Box sx={{ marginBottom: 2, textAlign: 'center' }}>
+            <Box
+                sx={{
+                    marginBottom: 2,
+                    textAlign: 'center',
+                }}
+            >
                 <Typography variant="h5">
                     {mode === 'create'
-                        ? 'Створення запису'
+                        ? formatMessage({
+                            id: 'purchaseRecords.create',
+                        })
                         : mode === 'edit'
-                            ? 'Редагування запису'
-                            : 'Детальна інформація про запис'}
+                            ? formatMessage({
+                                id: 'purchaseRecords.edit',
+                            })
+                            : formatMessage({
+                                id: 'purchaseRecords.view',
+                            })}
                 </Typography>
             </Box>
 
             {mode === 'view' && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 2 }}>
-                    <Tooltip title="Редагувати">
-                        <IconButton onClick={handleEdit} aria-label="Редагувати">
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent:
+                            'flex-end',
+                        marginBottom: 2,
+                    }}
+                >
+                    <Tooltip
+                        title={formatMessage({
+                            id: 'purchaseRecords.editButton',
+                        })}
+                    >
+                        <IconButton
+                            onClick={handleEdit}
+                            aria-label={formatMessage({
+                                id: 'purchaseRecords.editButton',
+                            })}
+                        >
                             <EditIcon />
                         </IconButton>
                     </Tooltip>
@@ -293,100 +449,242 @@ function PurchaseRecordDetail() {
             )}
 
             {requestError && (
-                <Alert severity="error" sx={{ marginBottom: 2 }}>
+                <Alert
+                    severity="error"
+                    sx={{
+                        marginBottom: 2,
+                    }}
+                >
                     {requestError}
                 </Alert>
             )}
 
             {mode === 'view' && (
                 <Box sx={{ pl: 4 }}>
-                    <Typography sx={{ marginBottom: 2 }}>
-                        <strong>ID:</strong> {record.id}
-                    </Typography>
-                    <Typography sx={{ marginBottom: 2 }}>
-                        <strong>ID Заявки:</strong> {record.orderId}
-                    </Typography>
-                    <Typography sx={{ marginBottom: 2 }}>
-                        <strong>Матеріал:</strong> {record.material?.name}
-                    </Typography>
-                    <Typography sx={{ marginBottom: 2 }}>
-                        <strong>Одиниця виміру:</strong> {record.material?.unit}
-                    </Typography>
-                    <Typography sx={{ marginBottom: 2 }}>
-                        <strong>Опис матеріалу:</strong> {record.material?.description || '—'}
-                    </Typography>
-                    <Typography sx={{ marginBottom: 3 }}>
-                        <strong>Кількість:</strong> {record.quantity}
+                    <Typography
+                        sx={{ marginBottom: 2 }}
+                    >
+                        <strong>
+                            {formatMessage({
+                                id: 'purchaseRecords.id',
+                            })}
+                            :
+                        </strong>{' '}
+                        {record.id}
                     </Typography>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 3 }}>
-                        <Button onClick={handleBack}>Назад</Button>
+                    <Typography
+                        sx={{ marginBottom: 2 }}
+                    >
+                        <strong>
+                            {formatMessage({
+                                id: 'purchaseRecords.orderId',
+                            })}
+                            :
+                        </strong>{' '}
+                        {record.orderId}
+                    </Typography>
+
+                    <Typography
+                        sx={{ marginBottom: 2 }}
+                    >
+                        <strong>
+                            {formatMessage({
+                                id: 'purchaseRecords.material',
+                            })}
+                            :
+                        </strong>{' '}
+                        {record.material?.name}
+                    </Typography>
+
+                    <Typography
+                        sx={{ marginBottom: 2 }}
+                    >
+                        <strong>
+                            {formatMessage({
+                                id: 'purchaseRecords.unit',
+                            })}
+                            :
+                        </strong>{' '}
+                        {record.material?.unit}
+                    </Typography>
+
+                    <Typography
+                        sx={{ marginBottom: 2 }}
+                    >
+                        <strong>
+                            {formatMessage({
+                                id: 'purchaseRecords.materialDescription',
+                            })}
+                            :
+                        </strong>{' '}
+                        {record.material?.description ||
+                            formatMessage({
+                                id: 'purchaseRecords.emptyDescription',
+                            })}
+                    </Typography>
+
+                    <Typography
+                        sx={{ marginBottom: 3 }}
+                    >
+                        <strong>
+                            {formatMessage({
+                                id: 'purchaseRecords.quantity',
+                            })}
+                            :
+                        </strong>{' '}
+                        {record.quantity}
+                    </Typography>
+
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginTop: 3,
+                        }}
+                    >
+                        <Button
+                            onClick={handleBack}
+                        >
+                            {formatMessage({
+                                id: 'purchaseRecords.back',
+                            })}
+                        </Button>
                     </Box>
                 </Box>
             )}
 
-            {(mode === 'edit' || mode === 'create') && (
+            {(mode === 'edit' ||
+                mode === 'create') && (
                 <>
                     <TextField
                         fullWidth
-                        label="ID Заявки"
+                        label={formatMessage({
+                            id: 'purchaseRecords.orderId',
+                        })}
                         margin="normal"
                         value={form.orderId}
-                        error={Boolean(errors.orderId)}
-                        helperText={errors.orderId}
-                        onChange={handleChange('orderId')}
+                        error={Boolean(
+                            errors.orderId
+                        )}
+                        helperText={
+                            errors.orderId
+                        }
+                        onChange={handleChange(
+                            'orderId'
+                        )}
                     />
 
                     <TextField
                         fullWidth
                         select
-                        label="Матеріал"
+                        label={formatMessage({
+                            id: 'purchaseRecords.material',
+                        })}
                         margin="normal"
                         value={form.materialId}
-                        error={Boolean(errors.materialId)}
-                        helperText={errors.materialId}
-                        onChange={handleChange('materialId')}
+                        error={Boolean(
+                            errors.materialId
+                        )}
+                        helperText={
+                            errors.materialId
+                        }
+                        onChange={handleChange(
+                            'materialId'
+                        )}
                     >
-                        <MenuItem value="">Оберіть матеріал</MenuItem>
-                        {materials.map((material) => (
-                            <MenuItem key={material.id} value={material.id}>
-                                {material.name}
-                            </MenuItem>
-                        ))}
+                        <MenuItem value="">
+                            {formatMessage({
+                                id: 'purchaseRecords.selectMaterial',
+                            })}
+                        </MenuItem>
+
+                        {materials.map(
+                            (material) => (
+                                <MenuItem
+                                    key={
+                                        material.id
+                                    }
+                                    value={
+                                        material.id
+                                    }
+                                >
+                                    {material.name}
+                                </MenuItem>
+                            )
+                        )}
                     </TextField>
 
                     <TextField
                         fullWidth
-                        label="Кількість"
+                        label={formatMessage({
+                            id: 'purchaseRecords.quantity',
+                        })}
                         margin="normal"
                         type="number"
                         value={form.quantity}
-                        error={Boolean(errors.quantity)}
-                        helperText={errors.quantity}
-                        onChange={handleChange('quantity')}
+                        error={Boolean(
+                            errors.quantity
+                        )}
+                        helperText={
+                            errors.quantity
+                        }
+                        onChange={handleChange(
+                            'quantity'
+                        )}
                     />
 
-                    <Box sx={{ display: 'flex', gap: 1, marginTop: 3 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            gap: 1,
+                            marginTop: 3,
+                        }}
+                    >
                         <Button
                             disabled={isSaving}
-                            onClick={mode === 'create' ? handleCreate : handleSave}
+                            onClick={
+                                mode === 'create'
+                                    ? handleCreate
+                                    : handleSave
+                            }
                         >
-                            {mode === 'create' ? 'Створити' : 'Зберегти'}
+                            {mode === 'create'
+                                ? formatMessage({
+                                    id: 'purchaseRecords.createButton',
+                                })
+                                : formatMessage({
+                                    id: 'purchaseRecords.save',
+                                })}
                         </Button>
 
-                        <Button disabled={isSaving} onClick={handleCancel}>
-                            Скасувати
+                        <Button
+                            disabled={isSaving}
+                            onClick={handleCancel}
+                        >
+                            {formatMessage({
+                                id: 'purchaseRecords.cancel',
+                            })}
                         </Button>
                     </Box>
                 </>
             )}
 
             <Snackbar
-                open={Boolean(successMessage)}
+                open={Boolean(
+                    successMessage
+                )}
                 autoHideDuration={3000}
-                onClose={() => setSuccessMessage('')}
+                onClose={() =>
+                    setSuccessMessage('')
+                }
             >
-                <Alert severity="success" onClose={() => setSuccessMessage('')}>
+                <Alert
+                    severity="success"
+                    onClose={() =>
+                        setSuccessMessage('')
+                    }
+                >
                     {successMessage}
                 </Alert>
             </Snackbar>

@@ -45,6 +45,7 @@
   "purchaseRecords.error.create": "Failed to create record. Check the entered data.",
   "purchaseRecords.error.update": "Failed to save changes. Check the entered data.",
   "purchaseRecords.error.delete": "Failed to delete the record. Please try again.",
+  "purchaseRecords.error.conflict": "This material is already included in this order",
 
   "purchaseRecords.validation.orderIdRequired": "Order ID is required.",
   "purchaseRecords.validation.orderIdInvalid": "Order ID must contain only digits and be greater than 0.",

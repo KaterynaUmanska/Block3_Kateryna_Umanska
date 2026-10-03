@@ -5,6 +5,7 @@ import useLocationSearch from 'misc/hooks/useLocationSearch';
 import getMessages from './intl';
 import PurchaseRecordList from './containers/PurchaseRecordList';
 
+
 function Index(props) {
     const {
         lang,

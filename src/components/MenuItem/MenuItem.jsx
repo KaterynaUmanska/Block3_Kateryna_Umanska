@@ -17,34 +17,39 @@ const colorVariants = {
 };
 
 function MenuItem({
-  children,
-  colorVariant = colorVariants.primary,
-  onClick,
-  selected = false,
-  value,
-}) {
+                    children,
+                    colorVariant = colorVariants.primary,
+                    ...props
+                  }) {
   const { theme } = useTheme();
   const classes = getClasses({ theme });
+
   return (
-    <MenuItemMUI
-      onClick={onClick}
-      selected={selected}
-      sx={{
-        '&.MuiMenuItem-root': {
-          '&:hover': {
-            backgroundColor: theme.menuItem.color[colorVariant].backgroundHovered,
-          },
-          '&.Mui-selected': {
-            backgroundColor: theme.menuItem.color[colorVariant].backgroundSelected,
-          },
-        },
-      }}
-      value={value}
-    >
-      <div className={classes.container}>
-        {children}
-      </div>
-    </MenuItemMUI>
+      <MenuItemMUI
+          {...props}
+          sx={{
+            '&.MuiMenuItem-root': {
+                color: '#000000',
+              '&:hover': {
+                backgroundColor:
+                theme.menuItem.color[
+                    colorVariant
+                    ].backgroundHovered,
+              },
+              '&.Mui-selected': {
+                backgroundColor:
+                theme.menuItem.color[
+                    colorVariant
+                    ].backgroundSelected,
+              },
+            },
+            ...props.sx,
+          }}
+      >
+        <div className={classes.container}>
+          {children}
+        </div>
+      </MenuItemMUI>
   );
 }
 

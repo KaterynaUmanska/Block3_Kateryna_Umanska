@@ -26,35 +26,41 @@ const variants = {
   caption: 'caption',
   default: 'default',
   subTitle: 'subTitle',
-  title: 'title'
+  title: 'title',
 };
 
 const Typography = ({
-  align = alignment.inherit,
-  capitalize,
-  children,
-  color = colors.primary,
-  noWrap = false,
-  variant = variants.default,
-  wordBreak = 'normal',
-}) => {
+                      align = alignment.inherit,
+                      capitalize,
+                      children,
+                      color = colors.primary,
+                      noWrap = false,
+                      variant = variants.default,
+                      wordBreak = 'normal',
+                      sx,
+                    }) => {
   const { theme } = useTheme();
+
   return (
-    <TypographyMUI
-      align={align}
-      noWrap={noWrap}
-      sx={{
-        ...theme.typography.variants[variant],
-        textTransform: capitalize && 'capitalize',
-        caretColor: '#FFFFFF',
-        color: color === 'inherit'
-          ? 'inherit'
-          : theme.typography.color[color] || color,
-        wordBreak,
-      }}
-    >
-      {children}
-    </TypographyMUI>
+      <TypographyMUI
+          align={align}
+          noWrap={noWrap}
+          sx={{
+            ...theme.typography.variants[variant],
+            textTransform: capitalize && 'capitalize',
+            caretColor: '#FFFFFF',
+            color:
+                color === 'inherit'
+                    ? 'inherit'
+                    : color === 'primary'
+                        ? '#000000'
+                        : theme.typography.color[color] || color,
+            wordBreak,
+            ...sx,
+          }}
+      >
+        {children}
+      </TypographyMUI>
   );
 };
 

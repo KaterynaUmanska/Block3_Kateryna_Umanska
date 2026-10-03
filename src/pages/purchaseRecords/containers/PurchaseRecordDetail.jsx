@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from 'react';
+
+import Box from 'components/Box';
+import Alert from 'components/Alert';
+import CircularProgress from 'components/CircularProgress';
+import IconButton from 'components/IconButton';
+import MenuItem from 'components/MenuItem';
+import Snackbar from 'components/Snackbar';
+import TextField from 'components/TextField';
+import Tooltip from 'components/Tooltip';
+import Typography from 'components/Typography';
+
+import EditIcon from 'components/icons/Edit';
+
 import {
-    Alert,
-    Box,
-    CircularProgress,
-    IconButton,
-    MenuItem,
-    Snackbar,
-    TextField,
-    Tooltip,
-    Typography,
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+    useLocation,
+    useParams,
+} from 'react-router-dom';
 
 import Button from 'components/Button';
+
 import pageURLs from 'constants/pagesURLs';
+
 import {
     getPurchaseRecord,
     getMaterials,
@@ -22,10 +28,17 @@ import {
     createPurchaseRecord,
 } from 'misc/requests/purchaseRecords';
 
+import useLanguageNavigate from 'misc/hooks/useLanguageNavigate';
+
 import { useIntl } from 'react-intl';
 
+const LIST_STATE_KEY = 'purchase-records-list-state';
+
 const isConflictError = (error) => {
-    const status = error?.status || error?.response?.status;
+    const status =
+        error?.status ||
+        error?.response?.status;
+
     return Number(status) === 409;
 };
 
@@ -34,7 +47,7 @@ function PurchaseRecordDetail() {
 
     const { id } = useParams();
     const location = useLocation();
-    const navigate = useNavigate();
+    const navigate = useLanguageNavigate();
 
     const isCreateMode =
         location.pathname.endsWith('/new') ||
@@ -60,24 +73,36 @@ function PurchaseRecordDetail() {
     const [requestError, setRequestError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
+    const getListSearch = () =>
+        location.state?.listSearch ||
+        sessionStorage.getItem(LIST_STATE_KEY) ||
+        '';
+
     useEffect(() => {
         const loadData = async () => {
             try {
                 setIsLoading(true);
                 setRequestError('');
 
-                const materialsResponse = await getMaterials();
-                setMaterials(materialsResponse || []);
+                const materialsResponse =
+                    await getMaterials();
+
+                setMaterials(
+                    materialsResponse || []
+                );
 
                 if (isCreateMode) {
                     setRecord(null);
+
                     setForm({
                         orderId: '',
                         materialId: '',
                         quantity: '',
                     });
+
                     setErrors({});
                     setMode('create');
+
                     return;
                 }
 
@@ -87,6 +112,7 @@ function PurchaseRecordDetail() {
                             id: 'purchaseRecords.error.notFound',
                         })
                     );
+
                     return;
                 }
 
@@ -96,10 +122,18 @@ function PurchaseRecordDetail() {
                 setRecord(recordResponse);
 
                 setForm({
-                    orderId: recordResponse.orderId,
+                    orderId:
+                    recordResponse.orderId,
+
                     materialId:
-                        recordResponse.material?.id || '',
-                    quantity: recordResponse.quantity,
+                        recordResponse.material?.id != null
+                            ? String(
+                                recordResponse.material.id
+                            )
+                            : '',
+
+                    quantity:
+                    recordResponse.quantity,
                 });
 
                 setMode('view');
@@ -137,6 +171,9 @@ function PurchaseRecordDetail() {
                 state: {
                     listSearch:
                         location.state?.listSearch ||
+                        sessionStorage.getItem(
+                            LIST_STATE_KEY
+                        ) ||
                         '',
                 },
             });
@@ -218,7 +255,11 @@ function PurchaseRecordDetail() {
 
     const getPreparedData = () => ({
         orderId: Number(form.orderId),
-        materialId: Number(form.materialId),
+
+        materialId: Number(
+            form.materialId
+        ),
+
         quantity: Number(
             String(form.quantity).replace(
                 ',',
@@ -236,17 +277,22 @@ function PurchaseRecordDetail() {
     const handleCancel = () => {
         if (isCreateMode) {
             navigate(
-                `${pageURLs.purchaseRecords}${
-                    location.state?.listSearch || ''
-                }`
+                `${pageURLs.purchaseRecords}${getListSearch()}`
             );
+
             return;
         }
 
         setForm({
             orderId: record.orderId,
+
             materialId:
-                record.material?.id || '',
+                record.material?.id != null
+                    ? String(
+                        record.material.id
+                    )
+                    : '',
+
             quantity: record.quantity,
         });
 
@@ -275,9 +321,8 @@ function PurchaseRecordDetail() {
                     replace: true,
                     state: {
                         listSearch:
-                            location.state
-                                ?.listSearch ||
-                            '',
+                            getListSearch(),
+
                         successMessage:
                             formatMessage({
                                 id: 'purchaseRecords.success.created',
@@ -331,9 +376,14 @@ function PurchaseRecordDetail() {
             setForm({
                 orderId:
                 updatedRecord.orderId,
+
                 materialId:
-                    updatedRecord.material?.id ||
-                    '',
+                    updatedRecord.material?.id != null
+                        ? String(
+                            updatedRecord.material.id
+                        )
+                        : '',
+
                 quantity:
                 updatedRecord.quantity,
             });
@@ -371,9 +421,7 @@ function PurchaseRecordDetail() {
 
     const handleBack = () => {
         navigate(
-            `${pageURLs.purchaseRecords}${
-                location.state?.listSearch || ''
-            }`
+            `${pageURLs.purchaseRecords}${getListSearch()}`
         );
     };
 
@@ -400,14 +448,22 @@ function PurchaseRecordDetail() {
     }
 
     return (
-        <Box sx={{ maxWidth: 700 }}>
+        <Box
+            sx={{
+                maxWidth: 700,
+            }}
+        >
             <Box
                 sx={{
                     marginBottom: 2,
                     textAlign: 'center',
                 }}
             >
-                <Typography variant="h5">
+                <Typography
+                    align="center"
+                    variant="title"
+                    sx={{ flexGrow: 1 }}
+                >
                     {mode === 'create'
                         ? formatMessage({
                             id: 'purchaseRecords.create',
@@ -461,9 +517,7 @@ function PurchaseRecordDetail() {
 
             {mode === 'view' && (
                 <Box sx={{ pl: 4 }}>
-                    <Typography
-                        sx={{ marginBottom: 2 }}
-                    >
+                    <Typography sx={{ mb: 2, fontSize: '18px' }}>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.id',
@@ -473,9 +527,7 @@ function PurchaseRecordDetail() {
                         {record.id}
                     </Typography>
 
-                    <Typography
-                        sx={{ marginBottom: 2 }}
-                    >
+                    <Typography sx={{ mb: 2 }}>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.orderId',
@@ -485,9 +537,7 @@ function PurchaseRecordDetail() {
                         {record.orderId}
                     </Typography>
 
-                    <Typography
-                        sx={{ marginBottom: 2 }}
-                    >
+                    <Typography sx={{ mb: 2 }}>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.material',
@@ -497,9 +547,7 @@ function PurchaseRecordDetail() {
                         {record.material?.name}
                     </Typography>
 
-                    <Typography
-                        sx={{ marginBottom: 2 }}
-                    >
+                    <Typography sx={{ mb: 2 }}>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.unit',
@@ -509,9 +557,7 @@ function PurchaseRecordDetail() {
                         {record.material?.unit}
                     </Typography>
 
-                    <Typography
-                        sx={{ marginBottom: 2 }}
-                    >
+                    <Typography sx={{ mb: 2 }}>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.materialDescription',
@@ -524,9 +570,7 @@ function PurchaseRecordDetail() {
                             })}
                     </Typography>
 
-                    <Typography
-                        sx={{ marginBottom: 3 }}
-                    >
+                    <Typography sx={{ mb: 3 }}>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.quantity',
@@ -540,12 +584,10 @@ function PurchaseRecordDetail() {
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            marginTop: 3,
+                            mt: 3,
                         }}
                     >
-                        <Button
-                            onClick={handleBack}
-                        >
+                        <Button onClick={handleBack}>
                             {formatMessage({
                                 id: 'purchaseRecords.back',
                             })}
@@ -605,9 +647,9 @@ function PurchaseRecordDetail() {
                                     key={
                                         material.id
                                     }
-                                    value={
+                                    value={String(
                                         material.id
-                                    }
+                                    )}
                                 >
                                     {material.name}
                                 </MenuItem>

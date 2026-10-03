@@ -1,37 +1,39 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     useLocation,
-    useNavigate,
 } from 'react-router-dom';
-import {
-    Alert,
-    Box,
-    IconButton,
-    Snackbar,
-    Table,
+
+import Box from 'components/Box';
+import Alert from 'components/Alert';
+import IconButton from 'components/IconButton';
+import Snackbar from 'components/Snackbar';
+import Button from 'components/Button';
+import Dialog from 'components/Dialog';
+import TextField from 'components/TextField';
+import Table, {
     TableBody,
     TableCell,
     TableHead,
     TableRow,
-    Typography as TypographyMui,
-} from '@mui/material';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import AddIcon from '@mui/icons-material/Add';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
+} from 'components/Table';
+import Typography from 'components/Typography';
 
-import Button from 'components/Button';
-import Dialog from 'components/Dialog';
-import TextField from 'components/TextField';
+import DeleteOutlineIcon from 'components/icons/Delete';
+import AddIcon from 'components/icons/Add';
+import FilterAltIcon from 'components/icons/FilterAlt';
+
 import pageURLs from 'constants/pagesURLs';
 import {
     getPurchaseRecords,
     deletePurchaseRecord,
 } from 'misc/requests/purchaseRecords';
 
+import useLanguageNavigate from 'misc/hooks/useLanguageNavigate';
+
 import { useIntl } from 'react-intl';
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_SIZE = 10;
+const DEFAULT_SIZE = 8;
 
 const LIST_STATE_KEY = 'purchase-records-list-state';
 
@@ -46,7 +48,7 @@ function PurchaseRecordList() {
     const { formatMessage } = useIntl();
 
     const location = useLocation();
-    const navigate = useNavigate();
+    const navigate = useLanguageNavigate();
 
     const [records, setRecords] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
@@ -71,11 +73,16 @@ function PurchaseRecordList() {
     });
 
     const getInitialSearch = () => {
-        if (location.search) return location.search;
+        if (location.search) {
+            return location.search;
+        }
+
         return sessionStorage.getItem(LIST_STATE_KEY) || '';
     };
 
-    const initialParams = new URLSearchParams(getInitialSearch());
+    const initialParams = new URLSearchParams(
+        getInitialSearch()
+    );
 
     const [page, setPage] = useState(
         Number(initialParams.get('page')) || DEFAULT_PAGE
@@ -228,8 +235,7 @@ function PurchaseRecordList() {
             }
         );
 
-        const search =
-            `?${params.toString()}`;
+        const search = `?${params.toString()}`;
 
         sessionStorage.setItem(
             LIST_STATE_KEY,
@@ -393,17 +399,15 @@ function PurchaseRecordList() {
                     marginBottom: 3,
                 }}
             >
-                <TypographyMui
-                    variant="h5"
-                    sx={{
-                        textAlign: 'center',
-                        flexGrow: 1,
-                    }}
+                <Typography
+                    align="center"
+                    variant="title"
+                    sx={{ flexGrow: 1 }}
                 >
                     {formatMessage({
                         id: 'purchaseRecords.title',
                     })}
-                </TypographyMui>
+                </Typography>
 
                 <Box
                     sx={{
@@ -451,9 +455,7 @@ function PurchaseRecordList() {
                         label={formatMessage({
                             id: 'purchaseRecords.orderId',
                         })}
-                        value={
-                            filterForm.orderId
-                        }
+                        value={filterForm.orderId}
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
@@ -467,9 +469,7 @@ function PurchaseRecordList() {
                         label={formatMessage({
                             id: 'purchaseRecords.material',
                         })}
-                        value={
-                            filterForm.materialName
-                        }
+                        value={filterForm.materialName}
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
@@ -483,9 +483,7 @@ function PurchaseRecordList() {
                         label={formatMessage({
                             id: 'purchaseRecords.quantityFrom',
                         })}
-                        value={
-                            filterForm.quantityFrom
-                        }
+                        value={filterForm.quantityFrom}
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
@@ -499,9 +497,7 @@ function PurchaseRecordList() {
                         label={formatMessage({
                             id: 'purchaseRecords.quantityTo',
                         })}
-                        value={
-                            filterForm.quantityTo
-                        }
+                        value={filterForm.quantityTo}
                         onChange={(event) =>
                             setFilterForm({
                                 ...filterForm,
@@ -582,18 +578,23 @@ function PurchaseRecordList() {
                             records.map(
                                 (record) => (
                                     <TableRow
-                                        key={
-                                            record.id
-                                        }
+                                        key={record.id}
                                         hover
                                         sx={{
-                                            cursor:
-                                                'pointer',
+                                            cursor: 'pointer',
 
-                                            '&:hover .delete-button':
-                                                {
-                                                    opacity: 1,
-                                                },
+                                            '& .delete-button': {
+                                                opacity: 0,
+                                                visibility: 'hidden',
+                                                pointerEvents: 'none',
+                                                transition: 'opacity 0.2s ease',
+                                            },
+
+                                            '&:hover .delete-button': {
+                                                opacity: 1,
+                                                visibility: 'visible',
+                                                pointerEvents: 'auto',
+                                            },
                                         }}
                                         onClick={() =>
                                             handleOpenRecord(
@@ -602,34 +603,24 @@ function PurchaseRecordList() {
                                         }
                                     >
                                         <TableCell>
-                                            {
-                                                record.id
-                                            }
+                                            {record.id}
                                         </TableCell>
 
                                         <TableCell>
-                                            {
-                                                record.orderId
-                                            }
+                                            {record.orderId}
                                         </TableCell>
 
                                         <TableCell>
-                                            {
-                                                record.materialName
-                                            }
+                                            {record.materialName}
                                         </TableCell>
 
                                         <TableCell>
-                                            {
-                                                record.quantity
-                                            }
+                                            {record.quantity}
                                         </TableCell>
 
                                         <TableCell
                                             align="right"
-                                            onClick={(
-                                                event
-                                            ) =>
+                                            onClick={(event) =>
                                                 event.stopPropagation()
                                             }
                                             sx={{
@@ -641,20 +632,13 @@ function PurchaseRecordList() {
                                                 aria-label={formatMessage({
                                                     id: 'purchaseRecords.delete.confirmButton',
                                                 })}
-                                                onClick={() =>
-                                                    setDeleteDialog(
-                                                        {
-                                                            open: true,
-                                                            record,
-                                                            error: '',
-                                                            isLoading: false,
-                                                        }
-                                                    )
-                                                }
-                                                sx={{
-                                                    opacity: 0,
-                                                    transition:
-                                                        'opacity 0.2s ease',
+                                                onClick={() => {
+                                                    setDeleteDialog({
+                                                        open: true,
+                                                        record,
+                                                        error: '',
+                                                        isLoading: false,
+                                                    });
                                                 }}
                                             >
                                                 <DeleteOutlineIcon />
@@ -719,9 +703,9 @@ function PurchaseRecordList() {
                     })}
                 </Button>
 
-                <TypographyMui>
+                <Typography>
                     {page} / {totalPages}
-                </TypographyMui>
+                </Typography>
 
                 <Button
                     disabled={
@@ -743,9 +727,7 @@ function PurchaseRecordList() {
             <Dialog
                 open={deleteDialog.open}
                 onClose={() => {
-                    if (
-                        !deleteDialog.isLoading
-                    ) {
+                    if (!deleteDialog.isLoading) {
                         setDeleteDialog({
                             open: false,
                             record: null,
@@ -756,13 +738,13 @@ function PurchaseRecordList() {
                 }}
             >
                 <Box sx={{ padding: 3 }}>
-                    <TypographyMui variant="h6">
+                    <Typography variant="h6">
                         {formatMessage({
                             id: 'purchaseRecords.delete.title',
                         })}
-                    </TypographyMui>
+                    </Typography>
 
-                    <TypographyMui
+                    <Typography
                         sx={{
                             marginTop: 2,
                         }}
@@ -776,7 +758,7 @@ function PurchaseRecordList() {
                                     .record?.id,
                             }
                         )}
-                    </TypographyMui>
+                    </Typography>
 
                     {deleteDialog.error && (
                         <Alert
@@ -785,9 +767,7 @@ function PurchaseRecordList() {
                                 marginTop: 2,
                             }}
                         >
-                            {
-                                deleteDialog.error
-                            }
+                            {deleteDialog.error}
                         </Alert>
                     )}
 
@@ -795,8 +775,7 @@ function PurchaseRecordList() {
                         sx={{
                             display: 'flex',
                             gap: 1,
-                            justifyContent:
-                                'flex-end',
+                            justifyContent: 'flex-end',
                             marginTop: 3,
                         }}
                     >
@@ -839,9 +818,7 @@ function PurchaseRecordList() {
 
             <Snackbar
                 autoHideDuration={3000}
-                open={
-                    notification.open
-                }
+                open={notification.open}
                 onClose={() =>
                     setNotification({
                         ...notification,
@@ -850,9 +827,7 @@ function PurchaseRecordList() {
                 }
             >
                 <Alert
-                    severity={
-                        notification.severity
-                    }
+                    severity={notification.severity}
                     onClose={() =>
                         setNotification({
                             ...notification,
@@ -860,9 +835,7 @@ function PurchaseRecordList() {
                         })
                     }
                 >
-                    {
-                        notification.message
-                    }
+                    {notification.message}
                 </Alert>
             </Snackbar>
         </Box>

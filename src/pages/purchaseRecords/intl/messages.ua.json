@@ -45,6 +45,7 @@
   "purchaseRecords.error.create": "Не вдалося створити запис. Перевірте введені дані.",
   "purchaseRecords.error.update": "Не вдалося зберегти зміни. Перевірте введені дані.",
   "purchaseRecords.error.delete": "Не вдалося видалити запис. Спробуйте ще раз.",
+  "purchaseRecords.error.conflict": "Даний матеріал вже входить до даної закупівлі",
 
   "purchaseRecords.validation.orderIdRequired": "ID заявки є обов’язковим.",
   "purchaseRecords.validation.orderIdInvalid": "ID заявки має містити лише цифри та бути більше 0.",

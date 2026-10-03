@@ -26,8 +26,8 @@ import IntlProvider from '../components/IntlProvider';
 import MissedPage from '../components/MissedPage';
 import SearchParamsConfigurator from '../components/SearchParamsConfigurator';
 
-import PurchaseRecordList from 'pages/purchaseRecords/containers/PurchaseRecordList';
-import PurchaseRecordDetail from 'pages/purchaseRecords/containers/PurchaseRecordDetail';
+import PurchaseRecordList from 'pageProviders/PurchaseRecordList';
+import PurchaseRecordDetail from 'pageProviders/PurchaseRecordDetail';
 
 function App() {
   const dispatch = useDispatch();

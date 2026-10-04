@@ -1,0 +1,58 @@
+{
+  "purchaseRecords.title": "Записи про закупівлі",
+  "purchaseRecords.create": "Створення запису",
+  "purchaseRecords.edit": "Редагування запису",
+  "purchaseRecords.view": "Детальна інформація про запис",
+
+  "purchaseRecords.filter": "Фільтр",
+  "purchaseRecords.add": "Додати сутність",
+  "purchaseRecords.apply": "Застосувати",
+  "purchaseRecords.clear": "Очистити",
+
+  "purchaseRecords.id": "ID",
+  "purchaseRecords.orderId": "ID заявки",
+  "purchaseRecords.materialName": "Матеріал",
+  "purchaseRecords.quantity": "Кількість",
+  "purchaseRecords.quantityFrom": "Кількість від",
+  "purchaseRecords.quantityTo": "Кількість до",
+
+  "purchaseRecords.previous": "Попередня",
+  "purchaseRecords.next": "Наступна",
+
+  "purchaseRecords.loading": "Завантаження...",
+  "purchaseRecords.noRecords": "Записів не знайдено.",
+
+  "purchaseRecords.delete.title": "Видалення запису",
+  "purchaseRecords.delete.confirm": "Ви впевнені, що хочете видалити запис №{id}?",
+  "purchaseRecords.delete.confirmButton": "Видалити",
+  "purchaseRecords.cancel": "Скасувати",
+
+  "purchaseRecords.back": "Назад",
+  "purchaseRecords.editButton": "Редагувати",
+  "purchaseRecords.save": "Зберегти",
+  "purchaseRecords.createButton": "Створити",
+
+  "purchaseRecords.unit": "Одиниця виміру",
+  "purchaseRecords.materialDescription": "Опис матеріалу",
+
+  "purchaseRecords.success.created": "Запис успішно створено.",
+  "purchaseRecords.success.updated": "Запис успішно відредаговано.",
+  "purchaseRecords.success.deleted": "Запис успішно видалено.",
+
+  "purchaseRecords.error.notFound": "Запис не знайдено.",
+  "purchaseRecords.error.load": "Не вдалося завантажити запис про закупівлю.",
+  "purchaseRecords.error.loadList": "Не вдалося завантажити записи про закупівлі.",
+  "purchaseRecords.error.create": "Не вдалося створити запис. Перевірте введені дані.",
+  "purchaseRecords.error.update": "Не вдалося зберегти зміни. Перевірте введені дані.",
+  "purchaseRecords.error.delete": "Не вдалося видалити запис. Спробуйте ще раз.",
+  "purchaseRecords.error.conflict": "Даний матеріал вже входить до даної закупівлі",
+
+  "purchaseRecords.validation.orderIdRequired": "ID заявки є обов’язковим.",
+  "purchaseRecords.validation.orderIdInvalid": "ID заявки має містити лише цифри та бути більше 0.",
+  "purchaseRecords.validation.materialRequired": "Матеріал є обов’язковим.",
+  "purchaseRecords.validation.quantityRequired": "Кількість є обов’язковою.",
+  "purchaseRecords.validation.quantityInvalid": "Кількість має бути числом більше 0.",
+
+  "purchaseRecords.selectMaterial": "Оберіть матеріал",
+  "purchaseRecords.emptyDescription": "—"
+}

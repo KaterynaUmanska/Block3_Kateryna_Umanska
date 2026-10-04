@@ -26,6 +26,9 @@ import IntlProvider from '../components/IntlProvider';
 import MissedPage from '../components/MissedPage';
 import SearchParamsConfigurator from '../components/SearchParamsConfigurator';
 
+import PurchaseRecordList from 'pageProviders/PurchaseRecordList';
+import PurchaseRecordDetail from 'pageProviders/PurchaseRecordDetail';
+
 function App() {
   const dispatch = useDispatch();
   const [state, setState] = useState({
@@ -53,82 +56,95 @@ function App() {
   }, []);
 
   return (
-    <UserProvider>
-      <AuthoritiesProvider>
-        <ThemeProvider>
-          <BrowserRouter>
-            <SearchParamsConfigurator />
-            {/* This is needed to let first render passed for App's
+      <UserProvider>
+        <AuthoritiesProvider>
+          <ThemeProvider>
+            <BrowserRouter>
+              <SearchParamsConfigurator />
+              {/* This is needed to let first render passed for App's
               * configuration process will be finished (e.g. locationQuery
               * initializing) */}
-            {state.componentDidMount && (
-              <IntlProvider>
-                <Header onLogout={() => dispatch(actionsUser.fetchSignOut())} />
-                {isFetchingUser && (
-                  <PageContainer>
-                    <Loading />
-                  </PageContainer>
-                )}
-                {!isFetchingUser && (
-                  <Routes>
-                    <Route
-                      element={<DefaultPage />}
-                      path={`${pageURLs[pages.defaultPage]}`}
-                    />
-                    <Route
-                      element={<SecretPage />}
-                      path={`${pageURLs[pages.secretPage]}`}
-                    />
-                    <Route
-                      element={(
-                        <LoginPage
-                          errors={errors}
-                          isFailedSignIn={isFailedSignIn}
-                          isFailedSignUp={isFailedSignUp}
-                          isFetchingSignIn={isFetchingSignIn}
-                          isFetchingSignUp={isFetchingSignUp}
-                          onSignIn={({
-                            email,
-                            login,
-                            password,
-                          }) => dispatch(actionsUser.fetchSignIn({
-                            email,
-                            login,
-                            password,
-                          }))}
-                          onSignUp={({
-                            email,
-                            firstName,
-                            lastName,
-                            login,
-                            password,
-                          }) => dispatch(actionsUser.fetchSignUp({
-                            email,
-                            firstName,
-                            lastName,
-                            login,
-                            password,
-                          }))}
-                        />
-                      )}
-                      path={`${pageURLs[pages.login]}`}
-                    />
-                    <Route
-                      element={(
-                        <MissedPage
-                          redirectPage={`${pageURLs[pages.defaultPage]}`}
-                        />
-                      )}
-                      path="*"
-                    />
-                  </Routes>
-                )}
-              </IntlProvider>
-            )}
-          </BrowserRouter>
-        </ThemeProvider>
-      </AuthoritiesProvider>
-    </UserProvider>
+              {state.componentDidMount && (
+                  <IntlProvider>
+                    <Header onLogout={() => dispatch(actionsUser.fetchSignOut())} />
+                    {isFetchingUser && (
+                        <PageContainer>
+                          <Loading />
+                        </PageContainer>
+                    )}
+                    {!isFetchingUser && (
+                        <Routes>
+                          <Route
+                              element={<DefaultPage />}
+                              path={`${pageURLs[pages.defaultPage]}`}
+                          />
+                          <Route
+                              element={<SecretPage />}
+                              path={`${pageURLs[pages.secretPage]}`}
+                          />
+                          <Route
+                              element={(
+                                  <LoginPage
+                                      errors={errors}
+                                      isFailedSignIn={isFailedSignIn}
+                                      isFailedSignUp={isFailedSignUp}
+                                      isFetchingSignIn={isFetchingSignIn}
+                                      isFetchingSignUp={isFetchingSignUp}
+                                      onSignIn={({
+                                                   email,
+                                                   login,
+                                                   password,
+                                                 }) => dispatch(actionsUser.fetchSignIn({
+                                        email,
+                                        login,
+                                        password,
+                                      }))}
+                                      onSignUp={({
+                                                   email,
+                                                   firstName,
+                                                   lastName,
+                                                   login,
+                                                   password,
+                                                 }) => dispatch(actionsUser.fetchSignUp({
+                                        email,
+                                        firstName,
+                                        lastName,
+                                        login,
+                                        password,
+                                      }))}
+                                  />
+                              )}
+                              path={`${pageURLs[pages.login]}`}
+                          />
+                          <Route
+                              element={(
+                                  <MissedPage
+                                      redirectPage={`${pageURLs[pages.defaultPage]}`}
+                                  />
+                              )}
+                              path="*"
+                          />
+                          <Route
+                              path={pageURLs[pages.purchaseRecords]}
+                              element={<PurchaseRecordList />}
+                          />
+                          <Route
+                              path={`${pageURLs.purchaseRecords}/new`}
+                              element={<PurchaseRecordDetail />}
+                          />
+                          <Route
+                              path={`${pageURLs.purchaseRecords}/:id`}
+                              element={<PurchaseRecordDetail />}
+                          />
+
+                        </Routes>
+                    )}
+                  </IntlProvider>
+              )}
+            </BrowserRouter>
+          </ThemeProvider>
+        </AuthoritiesProvider>
+      </UserProvider>
   );
 }
 

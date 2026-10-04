@@ -1,0 +1,59 @@
+{
+  "purchaseRecords.title": "Purchase records",
+  "purchaseRecords.create": "Create purchase record",
+  "purchaseRecords.edit": "Edit purchase record",
+  "purchaseRecords.view": "Purchase record details",
+
+  "purchaseRecords.filter": "Filter",
+  "purchaseRecords.add": "Add entity",
+  "purchaseRecords.apply": "Apply",
+  "purchaseRecords.clear": "Clear",
+
+  "purchaseRecords.id": "ID",
+  "purchaseRecords.orderId": "Order ID",
+  "purchaseRecords.materialName": "Material",
+  "purchaseRecords.quantity": "Quantity",
+  "purchaseRecords.quantityFrom": "Quantity from",
+  "purchaseRecords.quantityTo": "Quantity to",
+
+  "purchaseRecords.previous": "Previous",
+  "purchaseRecords.next": "Next",
+
+  "purchaseRecords.loading": "Loading...",
+  "purchaseRecords.noRecords": "No records found.",
+
+  "purchaseRecords.delete.title": "Delete record",
+  "purchaseRecords.delete.confirm": "Are you sure you want to delete record #{id}?",
+  "purchaseRecords.delete.confirmButton": "Delete",
+  "purchaseRecords.cancel": "Cancel",
+
+  "purchaseRecords.back": "Back",
+  "purchaseRecords.editButton": "Edit",
+  "purchaseRecords.save": "Save",
+  "purchaseRecords.createButton": "Create",
+
+  "purchaseRecords.unit": "Unit",
+  "purchaseRecords.materialDescription": "Material description",
+
+  "purchaseRecords.success.created": "Record was successfully created.",
+  "purchaseRecords.success.updated": "Record was successfully updated.",
+  "purchaseRecords.success.deleted": "Record was successfully deleted.",
+
+  "purchaseRecords.error.notFound": "Record was not found.",
+  "purchaseRecords.error.load": "Failed to load purchase record.",
+  "purchaseRecords.error.loadList": "Failed to load purchase records.",
+  "purchaseRecords.error.create": "Failed to create record. Check the entered data.",
+  "purchaseRecords.error.update": "Failed to save changes. Check the entered data.",
+  "purchaseRecords.error.delete": "Failed to delete the record. Please try again.",
+  "purchaseRecords.error.conflict": "This material is already included in this order",
+
+  "purchaseRecords.validation.orderIdRequired": "Order ID is required.",
+  "purchaseRecords.validation.orderIdInvalid": "Order ID must contain only digits and be greater than 0.",
+  "purchaseRecords.validation.materialRequired": "Material is required.",
+  "purchaseRecords.validation.quantityRequired": "Quantity is required.",
+  "purchaseRecords.validation.quantityInvalid": "Quantity must be a number greater than 0.",
+
+  "purchaseRecords.selectMaterial": "Select material",
+  "purchaseRecords.emptyDescription": "—"
+}
+

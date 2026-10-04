@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import Box from 'components/Box';
 import Alert from 'components/Alert';
 import CircularProgress from 'components/CircularProgress';
 import IconButton from 'components/IconButton';
@@ -9,7 +8,13 @@ import MenuItem from 'components/MenuItem';
 import Snackbar from 'components/Snackbar';
 import TextField from 'components/TextField';
 import Tooltip from 'components/Tooltip';
-import Typography from 'components/Typography';
+
+import {
+    PurchaseRecordBox,
+    PurchaseRecordTitle,
+    PurchaseRecordField,
+    PurchaseRecordAlert,
+} from '../components/Styled';
 
 import EditIcon from 'components/icons/Edit';
 
@@ -441,39 +446,26 @@ function PurchaseRecordDetail() {
 
     if (!record && !isCreateMode) {
         return (
-            <Box>
+            <PurchaseRecordBox>
                 <Alert severity="error">
                     {requestError}
                 </Alert>
 
-                <Box sx={{ marginTop: 2 }}>
+                <PurchaseRecordBox variant="errorBack">
                     <Button onClick={handleBack}>
                         {formatMessage({
                             id: 'purchaseRecords.back',
                         })}
                     </Button>
-                </Box>
-            </Box>
-        );
+            </PurchaseRecordBox>
+            </PurchaseRecordBox>
+    );
     }
 
     return (
-        <Box
-            sx={{
-                maxWidth: 700,
-            }}
-        >
-            <Box
-                sx={{
-                    marginBottom: 2,
-                    textAlign: 'center',
-                }}
-            >
-                <Typography
-                    align="center"
-                    variant="title"
-                    sx={{ flexGrow: 1 }}
-                >
+        <PurchaseRecordBox variant="detailRoot">
+            <PurchaseRecordBox variant="detailTitle">
+                <PurchaseRecordTitle align="center">
                     {mode === 'create'
                         ? formatMessage({
                             id: 'purchaseRecords.create',
@@ -485,18 +477,11 @@ function PurchaseRecordDetail() {
                             : formatMessage({
                                 id: 'purchaseRecords.view',
                             })}
-                </Typography>
-            </Box>
+                </PurchaseRecordTitle>
+            </PurchaseRecordBox>
 
             {mode === 'view' && (
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent:
-                            'flex-end',
-                        marginBottom: 2,
-                    }}
-                >
+                <PurchaseRecordBox variant="detailEditActions">
                     <Tooltip
                         title={formatMessage({
                             id: 'purchaseRecords.editButton',
@@ -511,23 +496,18 @@ function PurchaseRecordDetail() {
                             <EditIcon />
                         </IconButton>
                     </Tooltip>
-                </Box>
+                </PurchaseRecordBox>
             )}
 
             {requestError && (
-                <Alert
-                    severity="error"
-                    sx={{
-                        marginBottom: 2,
-                    }}
-                >
+                <PurchaseRecordAlert variant="errorWithMargin" severity="error">
                     {requestError}
-                </Alert>
+                </PurchaseRecordAlert>
             )}
 
             {mode === 'view' && (
-                <Box sx={{ pl: 4 }}>
-                    <Typography sx={{ mb: 2, fontSize: '18px' }}>
+                <PurchaseRecordBox variant="detailFields">
+                    <PurchaseRecordField emphasized>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.id',
@@ -535,9 +515,9 @@ function PurchaseRecordDetail() {
                             :
                         </strong>{' '}
                         {record.id}
-                    </Typography>
+                    </PurchaseRecordField>
 
-                    <Typography sx={{ mb: 2 }}>
+                    <PurchaseRecordField>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.orderId',
@@ -545,9 +525,9 @@ function PurchaseRecordDetail() {
                             :
                         </strong>{' '}
                         {record.orderId}
-                    </Typography>
+                    </PurchaseRecordField>
 
-                    <Typography sx={{ mb: 2 }}>
+                    <PurchaseRecordField>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.materialName',
@@ -555,9 +535,9 @@ function PurchaseRecordDetail() {
                             :
                         </strong>{' '}
                         {record.material?.name}
-                    </Typography>
+                    </PurchaseRecordField>
 
-                    <Typography sx={{ mb: 2 }}>
+                    <PurchaseRecordField>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.unit',
@@ -565,9 +545,9 @@ function PurchaseRecordDetail() {
                             :
                         </strong>{' '}
                         {record.material?.unit}
-                    </Typography>
+                    </PurchaseRecordField>
 
-                    <Typography sx={{ mb: 2 }}>
+                    <PurchaseRecordField>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.materialDescription',
@@ -578,9 +558,9 @@ function PurchaseRecordDetail() {
                             formatMessage({
                                 id: 'purchaseRecords.emptyDescription',
                             })}
-                    </Typography>
+                    </PurchaseRecordField>
 
-                    <Typography sx={{ mb: 3 }}>
+                    <PurchaseRecordField last>
                         <strong>
                             {formatMessage({
                                 id: 'purchaseRecords.quantity',
@@ -588,22 +568,16 @@ function PurchaseRecordDetail() {
                             :
                         </strong>{' '}
                         {record.quantity}
-                    </Typography>
+                    </PurchaseRecordField>
 
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            mt: 3,
-                        }}
-                    >
+                    <PurchaseRecordBox variant="detailBack">
                         <Button onClick={handleBack}>
                             {formatMessage({
                                 id: 'purchaseRecords.back',
                             })}
                         </Button>
-                    </Box>
-                </Box>
+                    </PurchaseRecordBox>
+                </PurchaseRecordBox>
             )}
 
             {(mode === 'edit' ||
@@ -686,13 +660,7 @@ function PurchaseRecordDetail() {
                         )}
                     />
 
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            gap: 1,
-                            marginTop: 3,
-                        }}
-                    >
+                    <PurchaseRecordBox variant="detailFormActions">
                         <Button
                             disabled={isSaving}
                             onClick={
@@ -718,7 +686,7 @@ function PurchaseRecordDetail() {
                                 id: 'purchaseRecords.cancel',
                             })}
                         </Button>
-                    </Box>
+                    </PurchaseRecordBox>
                 </>
             )}
 
@@ -740,7 +708,7 @@ function PurchaseRecordDetail() {
                     {successMessage}
                 </Alert>
             </Snackbar>
-        </Box>
+        </PurchaseRecordBox>
     );
 }
 

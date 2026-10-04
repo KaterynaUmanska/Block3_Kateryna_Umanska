@@ -4,7 +4,6 @@ import {
 } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import Box from 'components/Box';
 import Alert from 'components/Alert';
 import IconButton from 'components/IconButton';
 import Snackbar from 'components/Snackbar';
@@ -18,6 +17,14 @@ import Table, {
     TableRow,
 } from 'components/Table';
 import Typography from 'components/Typography';
+
+import {
+    PurchaseRecordBox,
+    PurchaseRecordTitle,
+    PurchaseRecordRow,
+    PurchaseRecordActionCell,
+    PurchaseRecordAlert,
+} from '../components/Styled';
 
 import DeleteOutlineIcon from 'components/icons/Delete';
 import AddIcon from 'components/icons/Add';
@@ -378,31 +385,15 @@ function PurchaseRecordList() {
     };
 
     return (
-        <Box sx={{ width: '100%' }}>
-            <Box
-                sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: 3,
-                }}
-            >
-                <Typography
-                    align="center"
-                    variant="title"
-                    sx={{ flexGrow: 1 }}
-                >
+        <PurchaseRecordBox variant="listRoot">
+            <PurchaseRecordBox variant="listHeader">
+                <PurchaseRecordTitle align="center">
                     {formatMessage({
                         id: 'purchaseRecords.title',
                     })}
-                </Typography>
+                </PurchaseRecordTitle>
 
-                <Box
-                    sx={{
-                        display: 'flex',
-                        gap: 1,
-                    }}
-                >
+                <PurchaseRecordBox variant="listHeaderActions">
                     <Button
                         startIcon={<FilterAltIcon />}
                         onClick={() =>
@@ -424,19 +415,11 @@ function PurchaseRecordList() {
                             id: 'purchaseRecords.add',
                         })}
                     </Button>
-                </Box>
-            </Box>
+                </PurchaseRecordBox>
+            </PurchaseRecordBox>
 
             {showFilters && (
-                <Box
-                    sx={{
-                        display: 'grid',
-                        gap: 2,
-                        gridTemplateColumns:
-                            'repeat(4, 1fr)',
-                        marginBottom: 3,
-                    }}
-                >
+                <PurchaseRecordBox variant="listFilters">
                     <TextField
                         label={formatMessage({
                             id: 'purchaseRecords.orderId',
@@ -501,12 +484,7 @@ function PurchaseRecordList() {
                         }
                     />
 
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            gap: 1,
-                        }}
-                    >
+                    <PurchaseRecordBox variant="inlineActions">
                         <Button
                             onClick={
                                 handleFilterSubmit
@@ -526,11 +504,11 @@ function PurchaseRecordList() {
                                 id: 'purchaseRecords.clear',
                             })}
                         </Button>
-                    </Box>
-                </Box>
+                    </PurchaseRecordBox>
+                </PurchaseRecordBox>
             )}
 
-            <Box sx={{ width: '100%' }}>
+            <PurchaseRecordBox variant="listTable">
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -565,25 +543,9 @@ function PurchaseRecordList() {
                     <TableBody>
                         {!isLoading &&
                             records.map((record) => (
-                                <TableRow
+                                <PurchaseRecordRow
+                                    variant="record"
                                     key={record.id}
-                                    sx={{
-                                        cursor: 'pointer',
-
-                                        '& .delete-button': {
-                                            opacity: 0,
-                                            visibility: 'hidden',
-                                            pointerEvents: 'none',
-                                            transition:
-                                                'opacity 0.2s ease',
-                                        },
-
-                                        '&:hover .delete-button': {
-                                            opacity: 1,
-                                            visibility: 'visible',
-                                            pointerEvents: 'auto',
-                                        },
-                                    }}
                                     onClick={() =>
                                         handleOpenRecord(
                                             record.id
@@ -606,14 +568,10 @@ function PurchaseRecordList() {
                                         {record.quantity}
                                     </TableCell>
 
-                                    <TableCell
-                                        align="right"
+                                    <PurchaseRecordActionCell
                                         onClick={(event) =>
                                             event.stopPropagation()
                                         }
-                                        sx={{
-                                            width: 56,
-                                        }}
                                     >
                                         <IconButton
                                             className="delete-button"
@@ -631,8 +589,8 @@ function PurchaseRecordList() {
                                         >
                                             <DeleteOutlineIcon />
                                         </IconButton>
-                                    </TableCell>
-                                </TableRow>
+                                    </PurchaseRecordActionCell>
+                                </PurchaseRecordRow>
                             ))}
 
                         {!isLoading &&
@@ -663,17 +621,9 @@ function PurchaseRecordList() {
                         )}
                     </TableBody>
                 </Table>
-            </Box>
+            </PurchaseRecordBox>
 
-            <Box
-                sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: 1,
-                    justifyContent: 'center',
-                    marginTop: 3,
-                }}
-            >
+            <PurchaseRecordBox variant="pagination">
                 <Button
                     disabled={
                         page <= 1 ||
@@ -709,7 +659,7 @@ function PurchaseRecordList() {
                         id: 'purchaseRecords.next',
                     })}
                 </Button>
-            </Box>
+            </PurchaseRecordBox>
 
             <Dialog
                 open={deleteDialog.open}
@@ -724,18 +674,14 @@ function PurchaseRecordList() {
                     }
                 }}
             >
-                <Box sx={{ padding: 3 }}>
+                <PurchaseRecordBox variant="dialogContent">
                     <Typography variant="h6">
                         {formatMessage({
                             id: 'purchaseRecords.delete.title',
                         })}
                     </Typography>
 
-                    <Typography
-                        sx={{
-                            marginTop: 2,
-                        }}
-                    >
+                    <PurchaseRecordBox variant="dialogText">
                         {formatMessage(
                             {
                                 id: 'purchaseRecords.delete.confirm',
@@ -745,27 +691,15 @@ function PurchaseRecordList() {
                                     .record?.id,
                             }
                         )}
-                    </Typography>
+                    </PurchaseRecordBox>
 
                     {deleteDialog.error && (
-                        <Alert
-                            severity="error"
-                            sx={{
-                                marginTop: 2,
-                            }}
-                        >
+                        <PurchaseRecordAlert variant="deleteError" severity="error">
                             {deleteDialog.error}
-                        </Alert>
+                        </PurchaseRecordAlert>
                     )}
 
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            gap: 1,
-                            justifyContent: 'flex-end',
-                            marginTop: 3,
-                        }}
-                    >
+                    <PurchaseRecordBox variant="dialogActions">
                         <Button
                             disabled={
                                 deleteDialog.isLoading
@@ -799,8 +733,8 @@ function PurchaseRecordList() {
                                 id: 'purchaseRecords.delete.confirmButton',
                             })}
                         </Button>
-                    </Box>
-                </Box>
+                    </PurchaseRecordBox>
+                </PurchaseRecordBox>
             </Dialog>
 
             <Snackbar
@@ -825,7 +759,7 @@ function PurchaseRecordList() {
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </Box>
+        </PurchaseRecordBox>
     );
 }
 

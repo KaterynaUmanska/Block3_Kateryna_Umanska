@@ -540,7 +540,7 @@ function PurchaseRecordDetail() {
                     <Typography sx={{ mb: 2 }}>
                         <strong>
                             {formatMessage({
-                                id: 'purchaseRecords.material',
+                                id: 'purchaseRecords.materialName',
                             })}
                             :
                         </strong>{' '}
@@ -621,7 +621,7 @@ function PurchaseRecordDetail() {
                         fullWidth
                         select
                         label={formatMessage({
-                            id: 'purchaseRecords.material',
+                            id: 'purchaseRecords.materialName',
                         })}
                         margin="normal"
                         value={form.materialId}

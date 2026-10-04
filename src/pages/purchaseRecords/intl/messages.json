@@ -11,7 +11,7 @@
 
   "purchaseRecords.id": "ID",
   "purchaseRecords.orderId": "Order ID",
-  "purchaseRecords.material": "Material",
+  "purchaseRecords.materialName": "Material",
   "purchaseRecords.quantity": "Quantity",
   "purchaseRecords.quantityFrom": "Quantity from",
   "purchaseRecords.quantityTo": "Quantity to",

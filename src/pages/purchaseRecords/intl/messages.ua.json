@@ -11,7 +11,7 @@
 
   "purchaseRecords.id": "ID",
   "purchaseRecords.orderId": "ID заявки",
-  "purchaseRecords.material": "Матеріал",
+  "purchaseRecords.materialName": "Матеріал",
   "purchaseRecords.quantity": "Кількість",
   "purchaseRecords.quantityFrom": "Кількість від",
   "purchaseRecords.quantityTo": "Кількість до",

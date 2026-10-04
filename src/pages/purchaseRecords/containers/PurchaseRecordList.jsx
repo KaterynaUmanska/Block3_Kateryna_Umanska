@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
     useLocation,
 } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Box from 'components/Box';
 import Alert from 'components/Alert';
@@ -24,9 +25,9 @@ import FilterAltIcon from 'components/icons/FilterAlt';
 
 import pageURLs from 'constants/pagesURLs';
 import {
-    getPurchaseRecords,
+    fetchPurchaseRecords,
     deletePurchaseRecord,
-} from 'misc/requests/purchaseRecords';
+} from 'app/actions/purchaseRecords';
 
 import useLanguageNavigate from 'misc/hooks/useLanguageNavigate';
 
@@ -46,13 +47,19 @@ const EMPTY_FILTERS = {
 
 function PurchaseRecordList() {
     const { formatMessage } = useIntl();
+    const dispatch = useDispatch();
+
+    const {
+        records,
+        totalPages,
+        isLoading,
+    } = useSelector(
+        (state) => state.purchaseRecords
+    );
 
     const location = useLocation();
     const navigate = useLanguageNavigate();
 
-    const [records, setRecords] = useState([]);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isLoading, setIsLoading] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
 
     const [savedSearch, setSavedSearch] = useState(
@@ -155,40 +162,17 @@ function PurchaseRecordList() {
         }
     }, [location.search]);
 
-    const loadRecords = useCallback(async () => {
-        setIsLoading(true);
-
-        try {
-            const response =
-                await getPurchaseRecords({
-                    orderId: filters.orderId
-                        ? Number(filters.orderId)
-                        : null,
-
-                    materialName:
-                        filters.materialName
-                            ? filters.materialName
-                            : null,
-
-                    quantityFrom:
-                        filters.quantityFrom
-                            ? Number(filters.quantityFrom)
-                            : null,
-
-                    quantityTo:
-                        filters.quantityTo
-                            ? Number(filters.quantityTo)
-                            : null,
-
-                    page,
-                    size,
-                });
-
-            setRecords(response.list || []);
-            setTotalPages(
-                response.totalPages || 1
-            );
-        } catch (error) {
+    const loadRecords = useCallback(() => {
+        dispatch(
+            fetchPurchaseRecords({
+                orderId: filters.orderId,
+                materialName: filters.materialName,
+                quantityFrom: filters.quantityFrom,
+                quantityTo: filters.quantityTo,
+                page,
+                size,
+            })
+        ).catch(() => {
             setNotification({
                 open: true,
                 message: formatMessage({
@@ -196,10 +180,9 @@ function PurchaseRecordList() {
                 }),
                 severity: 'error',
             });
-        } finally {
-            setIsLoading(false);
-        }
+        });
     }, [
+        dispatch,
         filters,
         page,
         size,
@@ -288,8 +271,10 @@ function PurchaseRecordList() {
         }));
 
         try {
-            await deletePurchaseRecord(
-                deleteDialog.record.id
+            await dispatch(
+                deletePurchaseRecord(
+                    deleteDialog.record.id
+                )
             );
 
             setDeleteDialog({
@@ -362,52 +347,156 @@ function PurchaseRecordList() {
 
         navigate(
             `${pageURLs.purchaseRecords}/new`,
-            {
-                state: {
-                    listSearch: currentSearch,
-                },
-            }
-        );
-    };
+{
+    state: {
+        listSearch: currentSearch,
+    },
+}
+);
+};
 
-    const handleOpenRecord = (id) => {
-        const currentSearch =
-            location.search || savedSearch;
+const handleOpenRecord = (id) => {
+    const currentSearch =
+        location.search || savedSearch;
 
-        sessionStorage.setItem(
-            LIST_STATE_KEY,
-            currentSearch
-        );
+    sessionStorage.setItem(
+        LIST_STATE_KEY,
+        currentSearch
+    );
 
-        navigate(
-            `${pageURLs.purchaseRecords}/${id}`,
-            {
-                state: {
-                    listSearch: currentSearch,
-                },
-            }
-        );
-    };
+    navigate(
+        `${pageURLs.purchaseRecords}/${id}`,
+        {
+            state: {
+                listSearch: currentSearch,
+            },
+        }
+    );
+};
 
-    return (
-        <Box sx={{ width: '100%' }}>
+return (
+    <Box sx={{ width: '100%' }}>
+        <Box
+            sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: 3,
+            }}
+        >
+            <Typography
+                align="center"
+                variant="title"
+                sx={{ flexGrow: 1 }}
+            >
+                {formatMessage({
+                    id: 'purchaseRecords.title',
+                })}
+            </Typography>
+
             <Box
                 sx={{
-                    alignItems: 'center',
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    gap: 1,
+                }}
+            >
+                <Button
+                    startIcon={<FilterAltIcon />}
+                    onClick={() =>
+                        setShowFilters(
+                            (value) => !value
+                        )
+                    }
+                >
+                    {formatMessage({
+                        id: 'purchaseRecords.filter',
+                    })}
+                </Button>
+
+                <Button
+                    startIcon={<AddIcon />}
+                    onClick={handleCreate}
+                >
+                    {formatMessage({
+                        id: 'purchaseRecords.add',
+                    })}
+                </Button>
+            </Box>
+        </Box>
+
+        {showFilters && (
+            <Box
+                sx={{
+                    display: 'grid',
+                    gap: 2,
+                    gridTemplateColumns:
+                        'repeat(4, 1fr)',
                     marginBottom: 3,
                 }}
             >
-                <Typography
-                    align="center"
-                    variant="title"
-                    sx={{ flexGrow: 1 }}
-                >
-                    {formatMessage({
-                        id: 'purchaseRecords.title',
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.orderId',
                     })}
-                </Typography>
+                    value={filterForm.orderId}
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            orderId:
+                            event.target.value,
+                        })
+                    }
+                />
+
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.materialName',
+                    })}
+                    value={
+                        filterForm.materialName
+                    }
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            materialName:
+                            event.target.value,
+                        })
+                    }
+                />
+
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.quantityFrom',
+                    })}
+                    type="number"
+                    value={
+                        filterForm.quantityFrom
+                    }
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            quantityFrom:
+                            event.target.value,
+                        })
+                    }
+                />
+
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.quantityTo',
+                    })}
+                    type="number"
+                    value={
+                        filterForm.quantityTo
+                    }
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            quantityTo:
+                            event.target.value,
+                        })
+                    }
+                />
 
                 <Box
                     sx={{
@@ -416,409 +505,313 @@ function PurchaseRecordList() {
                     }}
                 >
                     <Button
-                        startIcon={
-                            <FilterAltIcon />
-                        }
-                        onClick={() =>
-                            setShowFilters(
-                                (value) => !value
-                            )
+                        onClick={
+                            handleFilterSubmit
                         }
                     >
                         {formatMessage({
-                            id: 'purchaseRecords.filter',
+                            id: 'purchaseRecords.apply',
                         })}
                     </Button>
 
                     <Button
-                        startIcon={<AddIcon />}
-                        onClick={handleCreate}
+                        onClick={
+                            handleClearFilters
+                        }
                     >
                         {formatMessage({
-                            id: 'purchaseRecords.add',
+                            id: 'purchaseRecords.clear',
                         })}
                     </Button>
                 </Box>
             </Box>
+        )}
 
-            {showFilters && (
-                <Box
-                    sx={{
-                        display: 'grid',
-                        gap: 2,
-                        gridTemplateColumns:
-                            'repeat(4, 1fr)',
-                        marginBottom: 3,
-                    }}
-                >
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.orderId',
-                        })}
-                        value={filterForm.orderId}
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                orderId:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.material',
-                        })}
-                        value={filterForm.materialName}
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                materialName:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.quantityFrom',
-                        })}
-                        value={filterForm.quantityFrom}
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                quantityFrom:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.quantityTo',
-                        })}
-                        value={filterForm.quantityTo}
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                quantityTo:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            gap: 1,
-                        }}
-                    >
-                        <Button
-                            onClick={
-                                handleFilterSubmit
-                            }
-                        >
+        <Box sx={{ width: '100%' }}>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>
                             {formatMessage({
-                                id: 'purchaseRecords.apply',
+                                id: 'purchaseRecords.id',
                             })}
-                        </Button>
+                        </TableCell>
 
-                        <Button
-                            variant="text"
-                            onClick={
-                                handleClearFilters
-                            }
-                        >
+                        <TableCell>
                             {formatMessage({
-                                id: 'purchaseRecords.clear',
+                                id: 'purchaseRecords.orderId',
                             })}
-                        </Button>
-                    </Box>
-                </Box>
-            )}
+                        </TableCell>
 
-            <Box
-                sx={{
-                    overflowX: 'auto',
-                }}
-            >
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.id',
-                                })}
-                            </TableCell>
+                        <TableCell>
+                            {formatMessage({
+                                id: 'purchaseRecords.materialName',
+                            })}
+                        </TableCell>
 
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.orderId',
-                                })}
-                            </TableCell>
+                        <TableCell>
+                            {formatMessage({
+                                id: 'purchaseRecords.quantity',
+                            })}
+                        </TableCell>
 
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.material',
-                                })}
-                            </TableCell>
+                        <TableCell />
+                    </TableRow>
+                </TableHead>
 
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.quantity',
-                                })}
-                            </TableCell>
+                <TableBody>
+                    {!isLoading &&
+                        records.map((record) => (
+                            <TableRow
+                                key={record.id}
+                                sx={{
+                                    cursor: 'pointer',
 
-                            <TableCell align="right" />
-                        </TableRow>
-                    </TableHead>
+                                    '& .delete-button': {
+                                        opacity: 0,
+                                        visibility: 'hidden',
+                                        pointerEvents: 'none',
+                                        transition:
+                                            'opacity 0.2s ease',
+                                    },
 
-                    <TableBody>
-                        {!isLoading &&
-                            records.map(
-                                (record) => (
-                                    <TableRow
-                                        key={record.id}
-                                        hover
-                                        sx={{
-                                            cursor: 'pointer',
+                                    '&:hover .delete-button': {
+                                        opacity: 1,
+                                        visibility: 'visible',
+                                        pointerEvents: 'auto',
+                                    },
+                                }}
+                                onClick={() =>
+                                    handleOpenRecord(
+                                        record.id
+                                    )
+                                }
+                            >
+                                <TableCell>
+                                    {record.id}
+                                </TableCell>
 
-                                            '& .delete-button': {
-                                                opacity: 0,
-                                                visibility: 'hidden',
-                                                pointerEvents: 'none',
-                                                transition: 'opacity 0.2s ease',
-                                            },
+                                <TableCell>
+                                    {record.orderId}
+                                </TableCell>
 
-                                            '&:hover .delete-button': {
-                                                opacity: 1,
-                                                visibility: 'visible',
-                                                pointerEvents: 'auto',
-                                            },
-                                        }}
-                                        onClick={() =>
-                                            handleOpenRecord(
-                                                record.id
-                                            )
-                                        }
-                                    >
-                                        <TableCell>
-                                            {record.id}
-                                        </TableCell>
+                                <TableCell>
+                                    {record.materialName}
+                                </TableCell>
 
-                                        <TableCell>
-                                            {record.orderId}
-                                        </TableCell>
+                                <TableCell>
+                                    {record.quantity}
+                                </TableCell>
 
-                                        <TableCell>
-                                            {record.materialName}
-                                        </TableCell>
-
-                                        <TableCell>
-                                            {record.quantity}
-                                        </TableCell>
-
-                                        <TableCell
-                                            align="right"
-                                            onClick={(event) =>
-                                                event.stopPropagation()
-                                            }
-                                            sx={{
-                                                width: 56,
-                                            }}
-                                        >
-                                            <IconButton
-                                                className="delete-button"
-                                                aria-label={formatMessage({
-                                                    id: 'purchaseRecords.delete.confirmButton',
-                                                })}
-                                                onClick={() => {
-                                                    setDeleteDialog({
-                                                        open: true,
-                                                        record,
-                                                        error: '',
-                                                        isLoading: false,
-                                                    });
-                                                }}
-                                            >
-                                                <DeleteOutlineIcon />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            )}
-
-                        {!isLoading &&
-                            records.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={5}
-                                        align="center"
-                                    >
-                                        {formatMessage({
-                                            id: 'purchaseRecords.noRecords',
+                                <TableCell
+                                    align="right"
+                                    onClick={(event) =>
+                                        event.stopPropagation()
+                                    }
+                                    sx={{
+                                        width: 56,
+                                    }}
+                                >
+                                    <IconButton
+                                        className="delete-button"
+                                        aria-label={formatMessage({
+                                            id: 'purchaseRecords.delete.confirmButton',
                                         })}
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                                        onClick={() => {
+                                            setDeleteDialog({
+                                                open: true,
+                                                record,
+                                                error: '',
+                                                isLoading: false,
+                                            });
+                                        }}
+                                    >
+                                        <DeleteOutlineIcon />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
 
-                        {isLoading && (
+                    {!isLoading &&
+                        records.length === 0 && (
                             <TableRow>
                                 <TableCell
                                     colSpan={5}
                                     align="center"
                                 >
                                     {formatMessage({
-                                        id: 'purchaseRecords.loading',
+                                        id: 'purchaseRecords.noRecords',
                                     })}
                                 </TableCell>
                             </TableRow>
                         )}
-                    </TableBody>
-                </Table>
-            </Box>
 
-            <Box
-                sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: 1,
-                    justifyContent: 'center',
-                    marginTop: 3,
-                }}
+                    {isLoading && (
+                        <TableRow>
+                            <TableCell
+                                colSpan={5}
+                                align="center"
+                            >
+                                {formatMessage({
+                                    id: 'purchaseRecords.loading',
+                                })}
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </Box>
+
+        <Box
+            sx={{
+                alignItems: 'center',
+                display: 'flex',
+                gap: 1,
+                justifyContent: 'center',
+                marginTop: 3,
+            }}
+        >
+            <Button
+                disabled={
+                    page <= 1 ||
+                    isLoading
+                }
+                onClick={() =>
+                    handlePageChange(
+                        page - 1
+                    )
+                }
             >
-                <Button
-                    disabled={
-                        page <= 1 ||
-                        isLoading
-                    }
-                    onClick={() =>
-                        handlePageChange(
-                            page - 1
-                        )
-                    }
-                >
-                    {formatMessage({
-                        id: 'purchaseRecords.previous',
-                    })}
-                </Button>
+                {formatMessage({
+                    id: 'purchaseRecords.previous',
+                })}
+            </Button>
 
-                <Typography>
-                    {page} / {totalPages}
+            <Typography>
+                {page} / {totalPages}
+            </Typography>
+
+            <Button
+                disabled={
+                    page >= totalPages ||
+                    isLoading
+                }
+                onClick={() =>
+                    handlePageChange(
+                        page + 1
+                    )
+                }
+            >
+                {formatMessage({
+                    id: 'purchaseRecords.next',
+                })}
+            </Button>
+        </Box>
+
+        <Dialog
+            open={deleteDialog.open}
+            onClose={() => {
+                if (!deleteDialog.isLoading) {
+                    setDeleteDialog({
+                        open: false,
+                        record: null,
+                        error: '',
+                        isLoading: false,
+                    });
+                }
+            }}
+        >
+            <Box sx={{ padding: 3 }}>
+                <Typography variant="h6">
+                    {formatMessage({
+                        id: 'purchaseRecords.delete.title',
+                    })}
                 </Typography>
 
-                <Button
-                    disabled={
-                        page >= totalPages ||
-                        isLoading
-                    }
-                    onClick={() =>
-                        handlePageChange(
-                            page + 1
-                        )
-                    }
+                <Typography
+                    sx={{
+                        marginTop: 2,
+                    }}
                 >
-                    {formatMessage({
-                        id: 'purchaseRecords.next',
-                    })}
-                </Button>
-            </Box>
+                    {formatMessage(
+                        {
+                            id: 'purchaseRecords.delete.confirm',
+                        },
+                        {
+                            id: deleteDialog
+                                .record?.id,
+                        }
+                    )}
+                </Typography>
 
-            <Dialog
-                open={deleteDialog.open}
-                onClose={() => {
-                    if (!deleteDialog.isLoading) {
-                        setDeleteDialog({
-                            open: false,
-                            record: null,
-                            error: '',
-                            isLoading: false,
-                        });
-                    }
-                }}
-            >
-                <Box sx={{ padding: 3 }}>
-                    <Typography variant="h6">
-                        {formatMessage({
-                            id: 'purchaseRecords.delete.title',
-                        })}
-                    </Typography>
-
-                    <Typography
+                {deleteDialog.error && (
+                    <Alert
+                        severity="error"
                         sx={{
                             marginTop: 2,
                         }}
                     >
-                        {formatMessage(
-                            {
-                                id: 'purchaseRecords.delete.confirm',
-                            },
-                            {
-                                id: deleteDialog
-                                    .record?.id,
-                            }
-                        )}
-                    </Typography>
+                        {deleteDialog.error}
+                    </Alert>
+                )}
 
-                    {deleteDialog.error && (
-                        <Alert
-                            severity="error"
-                            sx={{
-                                marginTop: 2,
-                            }}
-                        >
-                            {deleteDialog.error}
-                        </Alert>
-                    )}
-
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            gap: 1,
-                            justifyContent: 'flex-end',
-                            marginTop: 3,
-                        }}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 1,
+                        justifyContent: 'flex-end',
+                        marginTop: 3,
+                    }}
+                >
+                    <Button
+                        disabled={
+                            deleteDialog.isLoading
+                        }
+                        onClick={() =>
+                            setDeleteDialog({
+                                open: false,
+                                record: null,
+                                error: '',
+                                isLoading: false,
+                            })
+                        }
                     >
-                        <Button
-                            disabled={
-                                deleteDialog.isLoading
-                            }
-                            onClick={() =>
-                                setDeleteDialog({
-                                    open: false,
-                                    record: null,
-                                    error: '',
-                                    isLoading: false,
-                                })
-                            }
-                        >
-                            {formatMessage({
-                                id: 'purchaseRecords.cancel',
-                            })}
-                        </Button>
+                        {formatMessage({
+                            id: 'purchaseRecords.cancel',
+                        })}
+                    </Button>
 
-                        <Button
-                            disabled={
-                                deleteDialog.isLoading
-                            }
-                            isLoading={
-                                deleteDialog.isLoading
-                            }
-                            onClick={
-                                handleDelete
-                            }
-                        >
-                            {formatMessage({
-                                id: 'purchaseRecords.delete.confirmButton',
-                            })}
-                        </Button>
-                    </Box>
+                    <Button
+                        disabled={
+                            deleteDialog.isLoading
+                        }
+                        isLoading={
+                            deleteDialog.isLoading
+                        }
+                        onClick={
+                            handleDelete
+                        }
+                    >
+                        {formatMessage({
+                            id: 'purchaseRecords.delete.confirmButton',
+                        })}
+                    </Button>
                 </Box>
-            </Dialog>
+            </Box>
+        </Dialog>
 
-            <Snackbar
-                autoHideDuration={3000}
-                open={notification.open}
+        <Snackbar
+            autoHideDuration={3000}
+            open={notification.open}
+            onClose={() =>
+                setNotification({
+                    ...notification,
+                    open: false,
+                })
+            }
+        >
+            <Alert
+                severity={notification.severity}
                 onClose={() =>
                     setNotification({
                         ...notification,
@@ -826,20 +819,11 @@ function PurchaseRecordList() {
                     })
                 }
             >
-                <Alert
-                    severity={notification.severity}
-                    onClose={() =>
-                        setNotification({
-                            ...notification,
-                            open: false,
-                        })
-                    }
-                >
-                    {notification.message}
-                </Alert>
-            </Snackbar>
-        </Box>
-    );
+                {notification.message}
+            </Alert>
+        </Snackbar>
+    </Box>
+);
 }
 
 export default PurchaseRecordList;

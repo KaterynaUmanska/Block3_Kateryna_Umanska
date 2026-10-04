@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Box from 'components/Box';
 import Alert from 'components/Alert';
@@ -22,11 +23,11 @@ import Button from 'components/Button';
 import pageURLs from 'constants/pagesURLs';
 
 import {
-    getPurchaseRecord,
-    getMaterials,
+    fetchPurchaseRecord,
+    fetchPurchaseMaterials,
     updatePurchaseRecord,
     createPurchaseRecord,
-} from 'misc/requests/purchaseRecords';
+} from 'app/actions/purchaseRecords';
 
 import useLanguageNavigate from 'misc/hooks/useLanguageNavigate';
 
@@ -44,6 +45,12 @@ const isConflictError = (error) => {
 
 function PurchaseRecordDetail() {
     const { formatMessage } = useIntl();
+    const dispatch = useDispatch();
+
+    const {
+        record: reduxRecord,
+        materials: reduxMaterials,
+    } = useSelector((state) => state.purchaseRecords);
 
     const { id } = useParams();
     const location = useLocation();
@@ -79,86 +86,87 @@ function PurchaseRecordDetail() {
         '';
 
     useEffect(() => {
+        let cancelled = false;
+
         const loadData = async () => {
             try {
                 setIsLoading(true);
                 setRequestError('');
 
-                const materialsResponse =
-                    await getMaterials();
-
-                setMaterials(
-                    materialsResponse || []
-                );
+                await dispatch(fetchPurchaseMaterials());
 
                 if (isCreateMode) {
-                    setRecord(null);
-
-                    setForm({
-                        orderId: '',
-                        materialId: '',
-                        quantity: '',
-                    });
-
-                    setErrors({});
-                    setMode('create');
-
+                    if (!cancelled) {
+                        setRecord(null);
+                        setForm({
+                            orderId: '',
+                            materialId: '',
+                            quantity: '',
+                        });
+                        setErrors({});
+                        setMode('create');
+                    }
                     return;
                 }
 
                 if (!id) {
-                    setRequestError(
-                        formatMessage({
-                            id: 'purchaseRecords.error.notFound',
-                        })
-                    );
-
                     return;
                 }
 
-                const recordResponse =
-                    await getPurchaseRecord(id);
+                const recordResponse = await dispatch(
+                    fetchPurchaseRecord(id)
+                );
 
-                setRecord(recordResponse);
-
-                setForm({
-                    orderId:
-                    recordResponse.orderId,
-
-                    materialId:
-                        recordResponse.material?.id != null
-                            ? String(
-                                recordResponse.material.id
-                            )
-                            : '',
-
-                    quantity:
-                    recordResponse.quantity,
-                });
-
-                setMode('view');
+                if (!cancelled) {
+                    setRecord(recordResponse);
+                    setForm({
+                        orderId: recordResponse.orderId,
+                        materialId:
+                            recordResponse.material?.id != null
+                                ? String(recordResponse.material.id)
+                                : '',
+                        quantity: recordResponse.quantity,
+                    });
+                    setMode('view');
+                }
             } catch (error) {
-                console.error(
-                    'LOAD DETAIL ERROR:',
-                    error
-                );
+                console.error('LOAD DETAIL ERROR:', error);
 
-                setRequestError(
-                    formatMessage({
-                        id: 'purchaseRecords.error.load',
-                    })
-                );
+                if (!cancelled) {
+                    setRequestError(
+                        formatMessage({
+                            id: 'purchaseRecords.error.load',
+                        })
+                    );
+                }
             } finally {
-                setIsLoading(false);
+                if (!cancelled) {
+                    setIsLoading(false);
+                }
             }
         };
 
         loadData();
+
+        return () => {
+            cancelled = true;
+        };
     }, [
+        dispatch,
         id,
         isCreateMode,
         formatMessage,
     ]);
+
+    useEffect(() => {
+        if (reduxRecord && !isCreateMode && String(reduxRecord.id) === String(id)) {
+            setRecord(reduxRecord);
+        }
+    }, [reduxRecord, id, isCreateMode]);
+
+    useEffect(() => {
+        setMaterials(reduxMaterials || []);
+    }, [reduxMaterials]);
 
     useEffect(() => {
         if (location.state?.successMessage) {
@@ -311,8 +319,10 @@ function PurchaseRecordDetail() {
 
         try {
             const createdRecord =
-                await createPurchaseRecord(
-                    getPreparedData()
+                await dispatch(
+                    createPurchaseRecord(
+                        getPreparedData()
+                    )
                 );
 
             navigate(
@@ -363,13 +373,13 @@ function PurchaseRecordDetail() {
         setRequestError('');
 
         try {
-            await updatePurchaseRecord(
-                id,
-                getPreparedData()
-            );
-
             const updatedRecord =
-                await getPurchaseRecord(id);
+                await dispatch(
+                    updatePurchaseRecord(
+                        id,
+                        getPreparedData()
+                    )
+                );
 
             setRecord(updatedRecord);
 

@@ -423,7 +423,7 @@ return (
                     }
                 />
 
-                <PurchaseRecordBox variant="filterActions">
+                <PurchaseRecordBox>
                     <Button
                         onClick={
                             handleFilterSubmit

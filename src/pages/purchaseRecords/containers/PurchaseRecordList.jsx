@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-    useLocation,
-} from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Alert from 'components/Alert';
@@ -43,14 +41,19 @@ import { useIntl } from 'react-intl';
 const DEFAULT_PAGE = 1;
 const DEFAULT_SIZE = 8;
 
-const LIST_STATE_KEY = 'purchase-records-list-state';
-
 const EMPTY_FILTERS = {
     orderId: '',
     materialName: '',
     quantityFrom: '',
     quantityTo: '',
 };
+
+const getFiltersFromParams = (params) => ({
+    orderId: params.get('orderId') || '',
+    materialName: params.get('materialName') || '',
+    quantityFrom: params.get('quantityFrom') || '',
+    quantityTo: params.get('quantityTo') || '',
+});
 
 function PurchaseRecordList() {
     const { formatMessage } = useIntl();
@@ -69,8 +72,24 @@ function PurchaseRecordList() {
 
     const [showFilters, setShowFilters] = useState(false);
 
-    const [savedSearch, setSavedSearch] = useState(
-        () => sessionStorage.getItem(LIST_STATE_KEY) || ''
+    const initialParams = new URLSearchParams(
+        location.search
+    );
+
+    const [page, setPage] = useState(
+        Number(initialParams.get('page')) || DEFAULT_PAGE
+    );
+
+    const [size, setSize] = useState(
+        Number(initialParams.get('size')) || DEFAULT_SIZE
+    );
+
+    const [filters, setFilters] = useState(
+        () => getFiltersFromParams(initialParams)
+    );
+
+    const [filterForm, setFilterForm] = useState(
+        () => getFiltersFromParams(initialParams)
     );
 
     const [deleteDialog, setDeleteDialog] = useState({
@@ -86,115 +105,55 @@ function PurchaseRecordList() {
         severity: 'success',
     });
 
-    const getInitialSearch = () => {
-        if (location.search) {
-            return location.search;
-        }
-
-        return sessionStorage.getItem(LIST_STATE_KEY) || '';
-    };
-
-    const initialParams = new URLSearchParams(
-        getInitialSearch()
-    );
-
-    const [page, setPage] = useState(
-        Number(initialParams.get('page')) || DEFAULT_PAGE
-    );
-
-    const [size, setSize] = useState(
-        Number(initialParams.get('size')) || DEFAULT_SIZE
-    );
-
-    const getFiltersFromParams = (params) => ({
-        orderId: params.get('orderId') || '',
-        materialName: params.get('materialName') || '',
-        quantityFrom: params.get('quantityFrom') || '',
-        quantityTo: params.get('quantityTo') || '',
-    });
-
-    const [filters, setFilters] = useState(
-        () => getFiltersFromParams(initialParams)
-    );
-
-    const [filterForm, setFilterForm] = useState(
-        () => getFiltersFromParams(initialParams)
-    );
-
     useEffect(() => {
-        const currentSavedSearch =
-            sessionStorage.getItem(LIST_STATE_KEY) || '';
+        const params = new URLSearchParams(
+            location.search
+        );
 
-        setSavedSearch(currentSavedSearch);
+        setPage(
+            Number(params.get('page')) || DEFAULT_PAGE
+        );
 
-        if (!location.search && currentSavedSearch) {
-            navigate(
-                `${pageURLs.purchaseRecords}${currentSavedSearch}`,
-                { replace: true }
-            );
-        }
-    }, [location.search, navigate]);
+        setSize(
+            Number(params.get('size')) || DEFAULT_SIZE
+        );
 
-    useEffect(() => {
-        const currentSearch =
-            location.search ||
-            sessionStorage.getItem(LIST_STATE_KEY) ||
-            '';
+        const nextFilters =
+            getFiltersFromParams(params);
 
-        if (currentSearch) {
-            sessionStorage.setItem(
-                LIST_STATE_KEY,
-                currentSearch
-            );
-
-            setSavedSearch(currentSearch);
-
-            const params = new URLSearchParams(
-                currentSearch
-            );
-
-            setPage(
-                Number(params.get('page')) || DEFAULT_PAGE
-            );
-
-            setSize(
-                Number(params.get('size')) || DEFAULT_SIZE
-            );
-
-            const nextFilters =
-                getFiltersFromParams(params);
-
-            setFilters(nextFilters);
-            setFilterForm(nextFilters);
-        }
+        setFilters(nextFilters);
+        setFilterForm(nextFilters);
     }, [location.search]);
 
-    const loadRecords = useCallback((pageToLoad = page) => {
-        return dispatch(
-            fetchPurchaseRecords({
-                orderId: filters.orderId,
-                materialName: filters.materialName,
-                quantityFrom: filters.quantityFrom,
-                quantityTo: filters.quantityTo,
-                page: pageToLoad,
-                size,
-            })
-        ).catch(() => {
-            setNotification({
-                open: true,
-                message: formatMessage({
-                    id: 'purchaseRecords.error.loadList',
-                }),
-                severity: 'error',
+    const loadRecords = useCallback(
+        (pageToLoad = page) => {
+            return dispatch(
+                fetchPurchaseRecords({
+                    orderId: filters.orderId,
+                    materialName: filters.materialName,
+                    quantityFrom: filters.quantityFrom,
+                    quantityTo: filters.quantityTo,
+                    page: pageToLoad,
+                    size,
+                })
+            ).catch(() => {
+                setNotification({
+                    open: true,
+                    message: formatMessage({
+                        id: 'purchaseRecords.error.loadList',
+                    }),
+                    severity: 'error',
+                });
             });
-        });
-    }, [
-        dispatch,
-        filters,
-        page,
-        size,
-        formatMessage,
-    ]);
+        },
+        [
+            dispatch,
+            filters,
+            page,
+            size,
+            formatMessage,
+        ]
+    );
 
     useEffect(() => {
         loadRecords();
@@ -225,14 +184,8 @@ function PurchaseRecordList() {
             }
         );
 
-        const search = `?${params.toString()}`;
-
-        sessionStorage.setItem(
-            LIST_STATE_KEY,
-            search
-        );
-
-        setSavedSearch(search);
+        const search =
+            `?${params.toString()}`;
 
         navigate(
             `${pageURLs.purchaseRecords}${search}`
@@ -299,7 +252,7 @@ function PurchaseRecordList() {
 
                 const currentParams =
                     new URLSearchParams(
-                        window.location.search
+                        location.search
                     );
 
                 currentParams.set(
@@ -310,12 +263,6 @@ function PurchaseRecordList() {
                 const newSearch =
                     `?${currentParams.toString()}`;
 
-                sessionStorage.setItem(
-                    LIST_STATE_KEY,
-                    newSearch
-                );
-
-                setSavedSearch(newSearch);
                 setPage(newPage);
 
                 navigate(
@@ -348,201 +295,194 @@ function PurchaseRecordList() {
 
     const handleCreate = () => {
         const currentSearch =
-            location.search || savedSearch;
-
-        sessionStorage.setItem(
-            LIST_STATE_KEY,
-            currentSearch
-        );
+            location.search;
 
         navigate(
             `${pageURLs.purchaseRecords}/new`,
-            {
-                state: {
-                    listSearch: currentSearch,
-                },
-            }
-        );
-    };
+{
+    state: {
+        listSearch: currentSearch,
+    },
+}
+);
+};
 
-    const handleOpenRecord = (id) => {
-        const currentSearch =
-            location.search || savedSearch;
+const handleOpenRecord = (id) => {
+    const currentSearch =
+        location.search;
 
-        sessionStorage.setItem(
-            LIST_STATE_KEY,
-            currentSearch
-        );
+    navigate(
+        `${pageURLs.purchaseRecords}/${id}`,
+        {
+            state: {
+                listSearch: currentSearch,
+            },
+        }
+    );
+};
 
-        navigate(
-            `${pageURLs.purchaseRecords}/${id}`,
-            {
-                state: {
-                    listSearch: currentSearch,
-                },
-            }
-        );
-    };
+return (
+    <PurchaseRecordBox variant="listRoot">
+        <PurchaseRecordBox variant="listHeader">
+            <PurchaseRecordTitle align="center">
+                {formatMessage({
+                    id: 'purchaseRecords.title',
+                })}
+            </PurchaseRecordTitle>
 
-    return (
-        <PurchaseRecordBox variant="listRoot">
-            <PurchaseRecordBox variant="listHeader">
-                <PurchaseRecordTitle align="center">
+            <PurchaseRecordBox variant="listHeaderActions">
+                <Button
+                    startIcon={
+                        <FilterAltIcon />
+                    }
+                    onClick={() =>
+                        setShowFilters(
+                            (value) => !value
+                        )
+                    }
+                >
                     {formatMessage({
-                        id: 'purchaseRecords.title',
+                        id: 'purchaseRecords.filter',
                     })}
-                </PurchaseRecordTitle>
+                </Button>
 
-                <PurchaseRecordBox variant="listHeaderActions">
+                <Button
+                    startIcon={
+                        <AddIcon />
+                    }
+                    onClick={handleCreate}
+                >
+                    {formatMessage({
+                        id: 'purchaseRecords.add',
+                    })}
+                </Button>
+            </PurchaseRecordBox>
+        </PurchaseRecordBox>
+
+        {showFilters && (
+            <PurchaseRecordBox variant="listFilters">
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.orderId',
+                    })}
+                    value={filterForm.orderId}
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            orderId:
+                            event.target.value,
+                        })
+                    }
+                />
+
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.materialName',
+                    })}
+                    value={
+                        filterForm.materialName
+                    }
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            materialName:
+                            event.target.value,
+                        })
+                    }
+                />
+
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.quantityFrom',
+                    })}
+                    value={
+                        filterForm.quantityFrom
+                    }
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            quantityFrom:
+                            event.target.value,
+                        })
+                    }
+                />
+
+                <TextField
+                    label={formatMessage({
+                        id: 'purchaseRecords.quantityTo',
+                    })}
+                    value={
+                        filterForm.quantityTo
+                    }
+                    onChange={(event) =>
+                        setFilterForm({
+                            ...filterForm,
+                            quantityTo:
+                            event.target.value,
+                        })
+                    }
+                />
+
+                <PurchaseRecordBox variant="filterActions">
                     <Button
-                        startIcon={<FilterAltIcon />}
-                        onClick={() =>
-                            setShowFilters(
-                                (value) => !value
-                            )
+                        onClick={
+                            handleFilterSubmit
                         }
                     >
                         {formatMessage({
-                            id: 'purchaseRecords.filter',
+                            id: 'purchaseRecords.apply',
                         })}
                     </Button>
 
                     <Button
-                        startIcon={<AddIcon />}
-                        onClick={handleCreate}
+                        onClick={
+                            handleClearFilters
+                        }
                     >
                         {formatMessage({
-                            id: 'purchaseRecords.add',
+                            id: 'purchaseRecords.clear',
                         })}
                     </Button>
                 </PurchaseRecordBox>
             </PurchaseRecordBox>
+        )}
 
-            {showFilters && (
-                <PurchaseRecordBox variant="listFilters">
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.orderId',
-                        })}
-                        value={filterForm.orderId}
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                orderId:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.materialName',
-                        })}
-                        value={
-                            filterForm.materialName
-                        }
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                materialName:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.quantityFrom',
-                        })}
-                        type="number"
-                        value={
-                            filterForm.quantityFrom
-                        }
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                quantityFrom:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <TextField
-                        label={formatMessage({
-                            id: 'purchaseRecords.quantityTo',
-                        })}
-                        type="number"
-                        value={
-                            filterForm.quantityTo
-                        }
-                        onChange={(event) =>
-                            setFilterForm({
-                                ...filterForm,
-                                quantityTo:
-                                event.target.value,
-                            })
-                        }
-                    />
-
-                    <PurchaseRecordBox variant="inlineActions">
-                        <Button
-                            onClick={
-                                handleFilterSubmit
-                            }
-                        >
+        <PurchaseRecordBox variant="listTable">
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>
                             {formatMessage({
-                                id: 'purchaseRecords.apply',
+                                id: 'purchaseRecords.id',
                             })}
-                        </Button>
+                        </TableCell>
 
-                        <Button
-                            onClick={
-                                handleClearFilters
-                            }
-                        >
+                        <TableCell>
                             {formatMessage({
-                                id: 'purchaseRecords.clear',
+                                id: 'purchaseRecords.orderId',
                             })}
-                        </Button>
-                    </PurchaseRecordBox>
-                </PurchaseRecordBox>
-            )}
+                        </TableCell>
 
-            <PurchaseRecordBox variant="listTable">
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.id',
-                                })}
-                            </TableCell>
+                        <TableCell>
+                            {formatMessage({
+                                id: 'purchaseRecords.materialName',
+                            })}
+                        </TableCell>
 
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.orderId',
-                                })}
-                            </TableCell>
+                        <TableCell>
+                            {formatMessage({
+                                id: 'purchaseRecords.quantity',
+                            })}
+                        </TableCell>
 
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.materialName',
-                                })}
-                            </TableCell>
+                        <TableCell />
+                    </TableRow>
+                </TableHead>
 
-                            <TableCell>
-                                {formatMessage({
-                                    id: 'purchaseRecords.quantity',
-                                })}
-                            </TableCell>
-
-                            <TableCell />
-                        </TableRow>
-                    </TableHead>
-
-                    <TableBody>
-                        {!isLoading &&
-                            records.map((record) => (
+                <TableBody>
+                    {!isLoading &&
+                        records.map(
+                            (record) => (
                                 <PurchaseRecordRow
                                     variant="record"
                                     key={record.id}
@@ -561,185 +501,214 @@ function PurchaseRecordList() {
                                     </TableCell>
 
                                     <TableCell>
-                                        {record.materialName}
+                                        {
+                                            record.materialName
+                                        }
                                     </TableCell>
 
                                     <TableCell>
-                                        {record.quantity}
+                                        {
+                                            record.quantity
+                                        }
                                     </TableCell>
 
                                     <PurchaseRecordActionCell
-                                        onClick={(event) =>
+                                        onClick={(
+                                            event
+                                        ) =>
                                             event.stopPropagation()
                                         }
                                     >
                                         <IconButton
                                             className="delete-button"
-                                            aria-label={formatMessage({
-                                                id: 'purchaseRecords.delete.confirmButton',
-                                            })}
+                                            aria-label={formatMessage(
+                                                {
+                                                    id: 'purchaseRecords.delete.confirmButton',
+                                                }
+                                            )}
                                             onClick={() => {
-                                                setDeleteDialog({
-                                                    open: true,
-                                                    record,
-                                                    error: '',
-                                                    isLoading: false,
-                                                });
+                                                setDeleteDialog(
+                                                    {
+                                                        open: true,
+                                                        record,
+                                                        error: '',
+                                                        isLoading: false,
+                                                    }
+                                                );
                                             }}
                                         >
                                             <DeleteOutlineIcon />
                                         </IconButton>
                                     </PurchaseRecordActionCell>
                                 </PurchaseRecordRow>
-                            ))}
+                            )
+                        )}
 
-                        {!isLoading &&
-                            records.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={5}
-                                        align="center"
-                                    >
-                                        {formatMessage({
-                                            id: 'purchaseRecords.noRecords',
-                                        })}
-                                    </TableCell>
-                                </TableRow>
-                            )}
-
-                        {isLoading && (
+                    {!isLoading &&
+                        records.length === 0 && (
                             <TableRow>
                                 <TableCell
                                     colSpan={5}
                                     align="center"
                                 >
                                     {formatMessage({
-                                        id: 'purchaseRecords.loading',
+                                        id: 'purchaseRecords.noRecords',
                                     })}
                                 </TableCell>
                             </TableRow>
                         )}
-                    </TableBody>
-                </Table>
-            </PurchaseRecordBox>
 
-            <PurchaseRecordBox variant="pagination">
-                <Button
-                    disabled={
-                        page <= 1 ||
-                        isLoading
-                    }
-                    onClick={() =>
-                        handlePageChange(
-                            page - 1
-                        )
-                    }
-                >
+                    {isLoading && (
+                        <TableRow>
+                            <TableCell
+                                colSpan={5}
+                                align="center"
+                            >
+                                {formatMessage({
+                                    id: 'purchaseRecords.loading',
+                                })}
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </PurchaseRecordBox>
+
+        <PurchaseRecordBox variant="pagination">
+            <Button
+                disabled={
+                    page <= 1 ||
+                    isLoading
+                }
+                onClick={() =>
+                    handlePageChange(
+                        page - 1
+                    )
+                }
+            >
+                {formatMessage({
+                    id: 'purchaseRecords.previous',
+                })}
+            </Button>
+
+            <Typography>
+                {page} / {totalPages}
+            </Typography>
+
+            <Button
+                disabled={
+                    page >= totalPages ||
+                    isLoading
+                }
+                onClick={() =>
+                    handlePageChange(
+                        page + 1
+                    )
+                }
+            >
+                {formatMessage({
+                    id: 'purchaseRecords.next',
+                })}
+            </Button>
+        </PurchaseRecordBox>
+
+        <Dialog
+            open={deleteDialog.open}
+            onClose={() => {
+                if (
+                    !deleteDialog.isLoading
+                ) {
+                    setDeleteDialog({
+                        open: false,
+                        record: null,
+                        error: '',
+                        isLoading: false,
+                    });
+                }
+            }}
+        >
+            <PurchaseRecordBox variant="dialogContent">
+                <Typography variant="h6">
                     {formatMessage({
-                        id: 'purchaseRecords.previous',
+                        id: 'purchaseRecords.delete.title',
                     })}
-                </Button>
-
-                <Typography>
-                    {page} / {totalPages}
                 </Typography>
 
-                <Button
-                    disabled={
-                        page >= totalPages ||
-                        isLoading
-                    }
-                    onClick={() =>
-                        handlePageChange(
-                            page + 1
-                        )
-                    }
-                >
-                    {formatMessage({
-                        id: 'purchaseRecords.next',
-                    })}
-                </Button>
-            </PurchaseRecordBox>
-
-            <Dialog
-                open={deleteDialog.open}
-                onClose={() => {
-                    if (!deleteDialog.isLoading) {
-                        setDeleteDialog({
-                            open: false,
-                            record: null,
-                            error: '',
-                            isLoading: false,
-                        });
-                    }
-                }}
-            >
-                <PurchaseRecordBox variant="dialogContent">
-                    <Typography variant="h6">
-                        {formatMessage({
-                            id: 'purchaseRecords.delete.title',
-                        })}
-                    </Typography>
-
-                    <PurchaseRecordBox variant="dialogText">
-                        {formatMessage(
-                            {
-                                id: 'purchaseRecords.delete.confirm',
-                            },
-                            {
-                                id: deleteDialog
-                                    .record?.id,
-                            }
-                        )}
-                    </PurchaseRecordBox>
-
-                    {deleteDialog.error && (
-                        <PurchaseRecordAlert variant="deleteError" severity="error">
-                            {deleteDialog.error}
-                        </PurchaseRecordAlert>
+                <PurchaseRecordBox variant="dialogText">
+                    {formatMessage(
+                        {
+                            id: 'purchaseRecords.delete.confirm',
+                        },
+                        {
+                            id: deleteDialog
+                                .record?.id,
+                        }
                     )}
-
-                    <PurchaseRecordBox variant="dialogActions">
-                        <Button
-                            disabled={
-                                deleteDialog.isLoading
-                            }
-                            onClick={() =>
-                                setDeleteDialog({
-                                    open: false,
-                                    record: null,
-                                    error: '',
-                                    isLoading: false,
-                                })
-                            }
-                        >
-                            {formatMessage({
-                                id: 'purchaseRecords.cancel',
-                            })}
-                        </Button>
-
-                        <Button
-                            disabled={
-                                deleteDialog.isLoading
-                            }
-                            isLoading={
-                                deleteDialog.isLoading
-                            }
-                            onClick={
-                                handleDelete
-                            }
-                        >
-                            {formatMessage({
-                                id: 'purchaseRecords.delete.confirmButton',
-                            })}
-                        </Button>
-                    </PurchaseRecordBox>
                 </PurchaseRecordBox>
-            </Dialog>
 
-            <Snackbar
-                autoHideDuration={3000}
-                open={notification.open}
+                {deleteDialog.error && (
+                    <PurchaseRecordAlert
+                        variant="deleteError"
+                        severity="error"
+                    >
+                        {
+                            deleteDialog.error
+                        }
+                    </PurchaseRecordAlert>
+                )}
+
+                <PurchaseRecordBox variant="dialogActions">
+                    <Button
+                        disabled={
+                            deleteDialog.isLoading
+                        }
+                        onClick={() =>
+                            setDeleteDialog({
+                                open: false,
+                                record: null,
+                                error: '',
+                                isLoading: false,
+                            })
+                        }
+                    >
+                        {formatMessage({
+                            id: 'purchaseRecords.cancel',
+                        })}
+                    </Button>
+
+                    <Button
+                        disabled={
+                            deleteDialog.isLoading
+                        }
+                        isLoading={
+                            deleteDialog.isLoading
+                        }
+                        onClick={
+                            handleDelete
+                        }
+                    >
+                        {formatMessage({
+                            id: 'purchaseRecords.delete.confirmButton',
+                        })}
+                    </Button>
+                </PurchaseRecordBox>
+            </PurchaseRecordBox>
+        </Dialog>
+
+        <Snackbar
+            autoHideDuration={3000}
+            open={notification.open}
+            onClose={() =>
+                setNotification({
+                    ...notification,
+                    open: false,
+                })
+            }
+        >
+            <Alert
+                severity={
+                    notification.severity
+                }
                 onClose={() =>
                     setNotification({
                         ...notification,
@@ -747,20 +716,11 @@ function PurchaseRecordList() {
                     })
                 }
             >
-                <Alert
-                    severity={notification.severity}
-                    onClose={() =>
-                        setNotification({
-                            ...notification,
-                            open: false,
-                        })
-                    }
-                >
-                    {notification.message}
-                </Alert>
-            </Snackbar>
-        </PurchaseRecordBox>
-    );
+                {notification.message}
+            </Alert>
+        </Snackbar>
+    </PurchaseRecordBox>
+);
 }
 
 export default PurchaseRecordList;
